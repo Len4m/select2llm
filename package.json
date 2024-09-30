@@ -1,0 +1,40 @@
+{
+  "type": "module",
+  "name": "select2llm",
+  "homepage": "https://len4m.github.io/",
+  "version": "1.0.0",
+  "description": "Select text to LLM",
+  "author": {
+    "name": "Lenam",
+    "email": "lenamgenx@protonmail.com",
+    "url": "https://len4m.github.io/"
+  },
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "rebuild": "npm rebuild --runtime=electron --target=32.1.2 --disturl=https://atom.io/download/atom-shell --abi=20.17.0",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "GPL-3.0",
+  "dependencies": {
+    "clipboardy": "^4.0.0",
+    "fs": "^0.0.1-security",
+    "ollama": "^0.5.9"
+  },
+  "devDependencies": {
+    "electron": "^32.1.2",
+    "electron-builder": "^25.0.5"
+  },
+  "build": {
+    "appId": "com.lenam.select2llm",
+    "productName": "Select2LLM",
+    "icon": "images/icon-transparent.png",
+    "linux": {
+      "category": "Utility",
+      "icon": "images/icon-transparent.png",
+      "target": ["AppImage"]
+    },
+    "asar": false
+  }
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Select2LLM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="pure-min.css">
+    <link rel="stylesheet" href="config.css">
+</head>
+
+<body>
+    <div class="flex-container">
+        <div class="flex-items">
+            <h1>Select<span style="color:#58bf93;margin:0 2px;">2</span><span style="color:#2c9bb4">LLM</span></h1>
+            <p style="margin:0;padding:0;font-size:12px;">Author: Lenam<br>
+                <span id="author-link">len4m.github.io</span>
+            </p>
+        </div>
+        <div class="flex-items"><img src="images/icon.png" class="logo"></div>
+    </div>
+
+    <div style="padding:0 15px;">
+        <h3 style="margin:0px 0px 15px 0px;">Listado de atajos</h3>
+        <ul id="shortcuts-list">
+            <li>Cargando ...</li>
+
+        </ul>
+    </div>
+    <form id="shortcut-form" class="pure-form" style="padding: 0 15px;">
+        <fieldset>
+            <legend>Configuración de atajos</legend>
+            <div class="config-short">
+                <div class="key-check">
+                    <input type="checkbox" id="ctrl" name="ctrl" checked>
+                    <label for="ctrl"><img id="ctrl-button" src="images/ctrl-control-button-icon.png"></label>
+                </div>
+                <div class="key-check">
+                    <input type="checkbox" id="alt" name="alt" checked>
+                    <label for="alt"><img src="images/alt-button-icon.png"></label>
+                </div>
+                <div class="key-check">
+                    <input type="checkbox" id="shift" name="shift" checked>
+                    <label for="shift"><img src="images/shift-button-icon.png"></label>
+                </div>
+                <img src="images/math-plus-icon.png" style="height: 18px;width:auto;">
+
+                <label>
+                    <input type="text" id="key" name="key" style="max-width:32px;font-weight: bold;" maxlength="1"
+                        pattern="[a-zA-Z0-9\+\-.,¡'/*]" required>
+                    <small>Tecla (alfanumérica o +-.,¡'/*)</small>
+                </label>
+            </div>
+            <label for="model">Modelo</label> <select id="model" name="model" required></select>
+            <textarea id="prompt" name="prompt"></textarea>
+            <button type="submit" class="pure-button pure-button-primary"
+                style="border-radius: 4px;margin-top:15px;">Agregar</button>
+        </fieldset>
+    </form>
+
+    <div id="del-confirm" class="confirm">
+        <div>
+            <p>Seguro que quiere eliminar el atajo?</p>
+            <button class="button-error pure-button" id="accept-confirm" data-index="0">Eliminar atajo</button>
+            <button class="button-success pure-button" id="cancer-confirm">Cancelar</button>
+        </div>
+    </div>
+    <template id="prompts-items" style="display:none;">
+        <li class="atajo-li">
+            <div class="atajo-atajo"></div>
+            <span class="atajo-model"></span>
+            <p></p>
+        </li>
+    </template>
+    <script src="config.js"></script>
+</body>
+
+</html>
