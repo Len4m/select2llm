@@ -29,12 +29,14 @@ export function listOllama() {
 }
 
 export function cancelOllama() {
-    global.inferencia = false;
-    try {
-        ollama.abort();
-    } catch (error) {
-        console.error('Error al cancelar:', error);
-        return;
+    if (global.inferencia) {
+        global.inferencia = false;
+        try {
+            ollama.abort();
+        } catch (error) {
+            console.error('Error al cancelar:', error);
+            return;
+        }
+        console.log("Petición cancelada");
     }
-    console.log("Petición cancelada");
 }

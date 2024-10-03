@@ -116,7 +116,7 @@ async function sendTextLinux(text) {
         // TODO: Detect auto-indent in programms.
         let keyReturn = 'echo ""';
         // Escribir la línea con `xdotool` y simular un "Enter"
-        if (lines.length>0) {
+        if (lines.length > 0) {
             keyReturn = `xdotool key --window '${wid}' Return`;
         }
         exec(line.length > 0 ? `${safeLine} && ${keyReturn} ` : `${keyReturn}`, (error, stdout, stderr) => {

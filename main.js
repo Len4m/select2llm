@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { registerShortcuts, loadShortcuts, saveShortcuts } from './controllers/shortcutsController.js';
-import {  listOllama, cancelOllama } from './controllers/ollamaController.js';
+import { listOllama, cancelOllama } from './controllers/ollamaController.js';
 
 
 // Obtener la ruta del directorio actual
@@ -106,7 +106,10 @@ app.whenReady().then(() => {
             enabled: true // TODO
         },
         {
-            click: () => process.exit(0),
+            click: () => {
+                if (process.platform !== 'darwin') app.quit();
+                process.exit(0);
+            },
             label: 'Salir'
         },
     ]);
@@ -122,7 +125,7 @@ app.whenReady().then(() => {
         clickCount++;
         if (clickTimeout) clearTimeout(clickTimeout);
         clickTimeout = setTimeout(() => {
-            if (global.inferencia && clickCount === 2) {
+            if (clickCount === 2) {
                 cancelOllama();
                 clickCount = 0;
                 return;
@@ -135,7 +138,7 @@ app.whenReady().then(() => {
                 configWindow.focus();
             }
             clickCount = 0; // Reiniciar el contador
-        }, 300);
+        }, 200);
     });
 
     // Registrar atajos desde el archivo JSON
