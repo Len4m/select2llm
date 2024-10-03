@@ -108,16 +108,18 @@ function escapeForBash(a) {
 
 async function sendTextLinux(text) {
     const lines = text.split('\n');
-    let clearAutoIndent='';
+    let clearAutoIndent = '';
     function typeLines(lines) {
         if (lines.length === 0) return;
         const line = lines.shift();
         const safeLine = escapeForBash(['xdotool', 'type', '--window', wid, , '--', line]);
-        // TODO: Anti auto indent, mejorar esto.
-        //clearAutoIndent = line.length > 0 ? `&& xdotool key --window '${wid}' Shift+Home && xdotool key --window '${wid}' Delete` : '';
-        clearAutoIndent='';
+        // TODO: Detect auto-indent in programms.
+        let keyReturn = 'echo ""';
         // Escribir la línea con `xdotool` y simular un "Enter"
-        exec(line.length > 0  ? `${safeLine} && xdotool key --window '${wid}' Return ${clearAutoIndent}` : `xdotool key --window '${wid}' Return`, (error, stdout, stderr) => {
+        if (lines.length>0) {
+            keyReturn = `xdotool key --window '${wid}' Return`;
+        }
+        exec(line.length > 0 ? `${safeLine} && ${keyReturn} ` : `${keyReturn}`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`Error escribiendo línea con xdotool: ${error}\n\n${stderr}`);
                 return;
