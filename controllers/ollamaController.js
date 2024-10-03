@@ -2,15 +2,9 @@
 import ollama from 'ollama';
 import { sendText } from './keyboardController.js';
 
-/**
- * TODO:  
- * - El proceso tarda mucho, hacerlo en streaming para no hacer esperar al usuario.
- * - El cancelar con esta solución no es efectivo, con streaming se podría solucionar.
- **/ 
 // Llamada a Ollama
 export async function callOllama(prompt, model = 'llama3.2:latest') {
     const message = { role: 'user', content: prompt }
-
     try {
         const response = await ollama.chat({ model: model, messages: [message], stream: true })
         for await (const part of response) {
