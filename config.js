@@ -1,4 +1,5 @@
-const { ipcRenderer } = require('electron');
+const { clipboard, ipcRenderer } = require('electron');
+
 const platform = process.platform;
 let shortcuts = [];
 let models = [];
@@ -59,8 +60,10 @@ function renderShortcuts() {
         item.querySelector('.atajo-atajo').innerHTML = atajoHtml;
         item.querySelector('.atajo-model').appendChild(document.createTextNode(shortcut.model));
         item.querySelector('p').innerHTML = htmlencode(shortcut.prompt).replace(/\n/g, "<br>");
+        // Del btn
         const delBtn = document.createElement('a');
-        delBtn.classList.add('atajo-del');
+        delBtn.classList.add('atajo-btn');
+        delBtn.setAttribute('title', 'Eliminar atajo')
         delBtn.innerHTML = '<img src="images/checkbox-cross-red-icon.png">';
         delBtn.onclick = (e) => {
             const dialog = document.getElementById('del-confirm');
@@ -68,6 +71,16 @@ function renderShortcuts() {
             document.getElementById('accept-confirm').setAttribute('data-index', index);
         };
         item.querySelector('.atajo-li').insertBefore(delBtn, item.querySelector('.atajo-li').firstChild);
+        // Copy prompt btn
+        const copyBtn = document.createElement('a');
+        copyBtn.setAttribute('title', 'Copiar prompt')
+        copyBtn.style.marginLeft = '10px';
+        copyBtn.classList.add('atajo-btn');
+        copyBtn.innerHTML = '<img src="images/copy-icon.png">';
+        copyBtn.onclick = (e) => {
+            clipboard.writeText(shortcut.prompt);
+        };
+        item.querySelector('.atajo-li').insertBefore(copyBtn, item.querySelector('.atajo-li').firstChild);
         list.appendChild(item);
     });
 }
@@ -143,13 +156,13 @@ if (window.sidebar) {
 }
 
 
-switch (navigator.language.substring(0,2)) {
+switch (navigator.language.substring(0, 2)) {
     case "es":
 
-    break;
+        break;
     case "ca":
 
-    break;
+        break;
     default:
 
 }

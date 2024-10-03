@@ -154,17 +154,21 @@ textarea#prompt {
     display: block
 }
 
-a.atajo-del {
+a.atajo-btn {
     float: right;
     cursor: pointer;
 }
 
-a.atajo-del img {
+a.atajo-btn:active {
+    background-image: linear-gradient(to top, #f4f5f5, #dfdddd);
+}
+
+a.atajo-btn img {
     width: 25px;
     opacity: 0.5;
 }
 
-a.atajo-del:hover img {
+a.atajo-btn:hover img {
     opacity: 1;
 }
 
