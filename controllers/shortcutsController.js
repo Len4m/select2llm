@@ -35,7 +35,7 @@ export function registerShortcuts() {
 
     shortcuts.forEach((shortcut) => {
         let combination = '';
-        if (shortcut.ctrl) combination += 'Control+';
+        if (shortcut.ctrl) combination += 'CommandOrControl+';
         if (shortcut.shift) combination += 'Shift+';
         if (shortcut.alt) combination += 'Alt+';
         combination += shortcut.key;

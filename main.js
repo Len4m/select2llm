@@ -6,10 +6,6 @@ import { registerShortcuts, loadShortcuts, saveShortcuts } from './controllers/s
 import {  listOllama, cancelOllama } from './controllers/ollamaController.js';
 
 
-
-
-
-
 // Obtener la ruta del directorio actual
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
