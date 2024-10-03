@@ -9,17 +9,17 @@ import { sendText } from './keyboardController.js';
  **/ 
 // Llamada a Ollama
 export async function callOllama(prompt, model = 'llama3.2:latest') {
+    const message = { role: 'user', content: prompt }
+
     try {
-        const response = await ollama.generate({
-            model: model,
-            prompt: prompt,
-        });
-        if (global.inferencia) {
-            console.log('Respuesta de Ollama:', response.response);
-            sendText(response.response);
+        const response = await ollama.chat({ model: model, messages: [message], stream: true })
+        for await (const part of response) {
+            if (global.inferencia) {
+                sendText(part.message.content)
+            }
         }
-    } catch (error) {
-        console.error('Error al llamar a Ollama:', error);
+    } catch (_) {
+        // Error por cancelación
     }
     global.inferencia = false;
 }
@@ -29,18 +29,18 @@ export function listOllama() {
     try {
         list = ollama.list();
     } catch (error) {
-        console.error('Error al cancelar a Ollama:', error);
+        console.error('Error al listar modelos:', error);
     }
     return list;
 }
 
 export function cancelOllama() {
+    global.inferencia = false;
     try {
         ollama.abort();
     } catch (error) {
-        console.error('Error al cancelar a Ollama:', error);
+        console.error('Error al cancelar:', error);
         return;
     }
-    global.inferencia = false;
     console.log("Petición cancelada");
 }

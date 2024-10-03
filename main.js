@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { registerShortcuts, loadShortcuts, saveShortcuts } from './controllers/shortcutsController.js';
-import { listOllama, cancelOllama } from './controllers/ollamaController.js';
+import {  listOllama, cancelOllama } from './controllers/ollamaController.js';
 
 
 
