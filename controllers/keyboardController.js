@@ -37,14 +37,18 @@ export function sendCopyCommand() {
 
 
 // Función para enviar texto como si fuera escrito
-export function sendText(text) {
+export async function sendText(text) {
     const platform = process.platform;
     if (platform === 'win32') {
         sendTextWindows(text);
     } else if (platform === 'darwin') {
         sendTextMac(text);
     } else if (platform === 'linux') {
-        sendTextLinux(text);
+        try {
+            await sendTextLinux(text);
+        } catch (error) {
+            console.error("sendTextLinux Error:", error);
+        }
     } else {
         console.error('Sistema operativo no soportado');
     }
@@ -106,30 +110,49 @@ function escapeForBash(a) {
     return ret.join(' ');
 }
 
-async function sendTextLinux(text) {
-    const lines = text.split('\n');
-    let clearAutoIndent = '';
-    function typeLines(lines) {
-        if (lines.length === 0) return;
-        const line = lines.shift();
-        const safeLine = escapeForBash(['xdotool', 'type', '--window', wid, , '--', line]);
-        // TODO: Detect auto-indent in programms.
-        let keyReturn = 'echo ""';
-        // Escribir la línea con `xdotool` y simular un "Enter"
-        if (lines.length > 0) {
-            keyReturn = `xdotool key --window '${wid}' Return`;
-        }
-        exec(line.length > 0 ? `${safeLine} && ${keyReturn} ` : `${keyReturn}`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Error escribiendo línea con xdotool: ${error}\n\n${stderr}`);
+
+function sendTextLinux(text) {
+    return new Promise((resolve, reject) => {
+        const lines = text.split('\n');
+        
+        function typeLines(lines) {
+            if (lines.length === 0) {
+                resolve(); // Resolución cuando todas las líneas han sido procesadas
                 return;
             }
-            // Llamar recursivamente para procesar la siguiente línea
-            typeLines(lines);
-        });
-    }
-    typeLines(lines);
+            const line = lines.shift();
+            let cmd;
+
+            if (line.length > 0) {
+                cmd = escapeForBash(['xdotool', 'type', '--clearmodifiers', '--window', wid, '--', line]);
+            }
+
+            if (lines.length > 0) {
+                if (line.length > 0)
+                    cmd += ` && xdotool key --clearmodifiers --window '${wid}' Return`;
+                else
+                    cmd = `xdotool key --clearmodifiers --window '${wid}' Return`;
+            }
+
+            if (cmd) {
+                exec(cmd, (error, stdout, stderr) => {
+                    if (error) {
+                        reject(`Error escribiendo línea con xdotool: ${error}\n\n${stderr}`);
+                        return;
+                    }
+                    // Llamar recursivamente para procesar la siguiente línea
+                    typeLines(lines);
+                });
+            } else {
+                typeLines(lines);
+            }
+        }
+
+        typeLines(lines);
+    });
 }
+
+
 
 
 function sendCopyLinux() {

@@ -49,7 +49,7 @@ export function registerShortcuts() {
                     global.inferencia = true;
                     const message = shortcut.prompt.indexOf('%s') !== -1 ?
                         shortcut.prompt.replace('%s', selectData) : shortcut.prompt + ' ' + selectData;
-                    console.log(`Prompt: ${message}`);
+                    console.log(`Prompt (${shortcut.model}): ${message}`);
                     // Llamada a ollama con el prompt
                     callOllama(message, shortcut.model);
                 }

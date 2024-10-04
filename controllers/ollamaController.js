@@ -9,7 +9,7 @@ export async function callOllama(prompt, model = 'llama3.2:latest') {
         const response = await ollama.chat({ model: model, messages: [message], stream: true })
         for await (const part of response) {
             if (global.inferencia) {
-                sendText(part.message.content)
+                await sendText(part.message.content)
             }
         }
     } catch (_) {
