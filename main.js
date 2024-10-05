@@ -138,7 +138,7 @@ app.whenReady().then(() => {
                 configWindow.focus();
             }
             clickCount = 0; // Reiniciar el contador
-        }, 200);
+        }, 300);
     });
 
     // Registrar atajos desde el archivo JSON

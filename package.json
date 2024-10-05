@@ -30,11 +30,14 @@
     "appId": "com.lenam.select2llm",
     "productName": "Select2LLM",
     "icon": "images/icon-transparent.png",
+    "asar": false,
     "linux": {
       "category": "Utility",
       "icon": "images/icon-transparent.png",
       "target": ["AppImage"]
     },
-    "asar": false
+    "win": {
+      "target": "nsis"
+    }
   }
 }
