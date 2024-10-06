@@ -10,22 +10,6 @@ const powerShellSendText = path.join(__dirname, '../bin/sendText.ps1');
 
 let hWnd;
 
-
-function escapeForPowershell(input) {
-    // Escapa comillas dobles con comillas dobles dobles
-    let escapedString = input.replace(/"/g, '""');
-
-    // Escapa comillas simples con comillas simples dobles
-    escapedString = escapedString.replace(/'/g, "''");
-
-    // Si hay espacios o caracteres especiales, envuélvelo en comillas dobles
-    if (/\s|[^a-zA-Z0-9]/.test(escapedString)) {
-        escapedString = `"${escapedString}"`;
-    }
-
-    return escapedString;
-}
-
 function escapeForSendKeys(input) {
     let escapedString = input;
 
