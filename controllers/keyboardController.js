@@ -44,7 +44,11 @@ export async function sendCopyCommand() {
 export async function sendText(text) {
     const platform = process.platform;
     if (platform === 'win32') {
-        sendTextWindows(text);
+        try {
+            await sendTextWindows(text);
+        } catch (error) {
+            console.error("sendTextWindows Error:", error);
+        }
     } else if (platform === 'darwin') {
         sendTextMac(text);
     } else if (platform === 'linux') {
