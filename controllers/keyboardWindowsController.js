@@ -7,7 +7,6 @@ const __dirname = path.dirname(__filename);
 const powerShellCopy = path.join(__dirname, '../bin/copy.ps1');
 const powerShellSendText = path.join(__dirname, '../bin/sendText.ps1');
 
-
 let hWnd;
 
 function escapeForSendKeys(input) {
@@ -48,10 +47,9 @@ export function sendCopyWindows() {
         });
     });
 }
+
 export function sendTextWindows(text) {
-    console.log('sendings:', text);
     let escapeText = escapeForSendKeys(text).toString('binary');
-    
     return new Promise((resolve, reject) => {
         if (!escapeText.length|| !text.length) resolve();
         exec(`powershell.exe -ExecutionPolicy Bypass -File ${powerShellSendText} -hWnd ${hWnd} -text "${escapeText}"`, (error, stdout, stderr) => {
