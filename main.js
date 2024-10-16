@@ -1,10 +1,12 @@
 import { app, globalShortcut, Tray, Menu, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-import { registerShortcuts, loadShortcuts, saveShortcuts } from './controllers/shortcutsController.js';
-import { listOllama, cancelOllama } from './controllers/ollamaController.js';
-
+import { createConfigWindow } from './windows/configWindow.js';
+import { createOverlayWindow } from './windows/overlayWindow.js';
+import { registerShortcuts, saveShortcuts } from './controllers/shortcutsController.js';
+import { cancelOllama } from './controllers/ollamaController.js';
+import { getWindowGeometry } from './controllers/keyboardController.js'
+import { globals } from './globals.js';
 
 // Obtener la ruta del directorio actual
 const __filename = fileURLToPath(import.meta.url);
@@ -12,55 +14,37 @@ const __dirname = path.dirname(__filename);
 
 Menu.setApplicationMenu(null);
 
-let tray = null;
-let configWindow = null;
-let iconIndex = 0;
-let animationInterval;
+let configWindow = null,
+    transparentWindow = null,
+    tray = null,
+    iconIndex = 0,
+    animationInterval,
+    clickTimeout;
 
-global.inferencia = false;
 
-// Crear ventana de configuración
-function createConfigWindow() {
-    if (configWindow) {
+
+function hideShowConfig() {
+    // Restaurar/mostrar la ventana principal si está oculta/minimizada
+    if (configWindow.isVisible()) {
+        configWindow.hide();
+    } else {
         configWindow.show();
-        return;
+        configWindow.focus();
     }
-    configWindow = new BrowserWindow({
-        width: 500,
-        height: 350,
-        minWidth: 500,
-        minHeight: 350,
-        show: true,
-        autoHideMenuBar: true,
-        menu: null,
-        icon: path.join(__dirname, 'images/icon-transparent.png'),
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false,
-        },
-    });
-    process.platform === "win32" && configWindow.removeMenu();
-    process.platform === "darwin" && Menu.setApplicationMenu(Menu.buildFromTemplate([]));
-
-    configWindow.loadFile('config.html');
-
-    // Mostrar la ventana solo cuando esté lista
-    configWindow.once('ready-to-show', () => {
-        configWindow.show();
-    });
-
-    // Comunicar con la ventana de configuración para cargar los atajos
-    configWindow.webContents.on('did-finish-load', async () => {
-        configWindow.webContents.send('load-shortcuts', loadShortcuts());
-        configWindow.webContents.send('load-models', await listOllama());
-
-    });
-    // Evitar que la ventana se destruya al cerrarse
-    configWindow.on('close', (event) => {
-        event.preventDefault(); // Evita que la ventana se cierre por completo
-        configWindow.hide(); // Oculta la ventana en lugar de destruirla
-    });
 }
+
+async function crearVentanaTransparente(obj) {
+    // Crear una nueva ventana transparente
+    transparentWindow = await createOverlayWindow(obj);
+}
+
+function quitarVentanaTransparente() {
+    if (transparentWindow) {
+        transparentWindow.close();
+        transparentWindow = null;
+    }
+}
+
 
 // Función para obtener el camino del icono actual
 function getIconPath(index) {
@@ -68,19 +52,34 @@ function getIconPath(index) {
     return path.join(__dirname, `images/animation/frame_${indexString}_delay-0.06s.png`);
 }
 
-// TODO: Horrible
-// Función para iniciar la animación del tray
-function startAnimation() {
+async function startInferencia() {
+    if (animationInterval)
+        clearInterval(animationInterval);
     animationInterval = setInterval(() => {
-        iconIndex = global.inferencia ? ((iconIndex + 1) % 20) : 0;
+        iconIndex = ((iconIndex + 1) % 20);
         tray.setImage(getIconPath(iconIndex));
-    }, 350); // Cambia 100 por la velocidad de la animación en milisegundos
+    }, 150);
+    // Create hiden window, 
+
+    let geo = await getWindowGeometry();
+    console.log(geo);
+    crearVentanaTransparente(geo);
+
+    globals.inferencia = true;
+}
+
+async function stopInferencia() {
+    if (animationInterval)
+        clearInterval(animationInterval);
+    tray.setImage(getIconPath(0));
+    quitarVentanaTransparente();
+    globals.inferencia = false;
 }
 
 // Comunicación desde la ventana de configuración para guardar los atajos
 ipcMain.on('save-shortcuts', (event, shortcuts) => {
     saveShortcuts(shortcuts);
-    registerShortcuts(); // Registrar los atajos recién guardados
+    registerShortcuts(startInferencia, stopInferencia);
 });
 
 // Author link
@@ -88,15 +87,22 @@ ipcMain.on('external-link', (event, url) => {
     shell.openExternal(url);
 });
 
-let clickTimeout;
-app.whenReady().then(() => {
+// Manejar el evento de cancelación desde el frontend
+ipcMain.on('cancelar-proceso', () => {
+    cancelOllama();
+    quitarVentanaTransparente();
+});
+
+app.whenReady().then(async () => {
     // Crear un icono de estado (tray)
     tray = new Tray(getIconPath(0));
 
     const contextMenu = Menu.buildFromTemplate([
         {
             label: 'Configuración (click)',
-            click: createConfigWindow
+            click: async () => {
+                hideShowConfig();
+            }
         },
         {
             label: 'Cancelar (doble click)',
@@ -117,7 +123,7 @@ app.whenReady().then(() => {
     tray.setContextMenu(contextMenu);
 
 
-    createConfigWindow();
+    configWindow = await createConfigWindow();
     configWindow.hide();
 
     let clickCount = 0;
@@ -130,25 +136,17 @@ app.whenReady().then(() => {
                 clickCount = 0;
                 return;
             }
-            // Restaurar/mostrar la ventana principal si está oculta/minimizada
-            if (configWindow.isVisible()) {
-                configWindow.hide();
-            } else {
-                configWindow.show();
-                configWindow.focus();
-            }
+            hideShowConfig();
             clickCount = 0; // Reiniciar el contador
         }, 300);
     });
 
     // Registrar atajos desde el archivo JSON
-    registerShortcuts();
-    // TODO: Status controller kk.
-    startAnimation();
+    registerShortcuts(startInferencia, stopInferencia);
 
     // Para asegurar que la aplicación siga funcionando en segundo plano
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) createConfigWindow();
+    app.on('activate', async () => {
+        if (BrowserWindow.getAllWindows().length === 0) configWindow = await createConfigWindow();
     });
 });
 

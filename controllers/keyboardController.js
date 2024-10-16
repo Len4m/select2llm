@@ -1,28 +1,23 @@
 import { exec } from 'child_process';
 import clipboard from 'clipboardy';
-import { sendCopyLinux, sendTextLinux } from './keyboardLinuxController.js';
-import { sendCopyWindows, sendTextWindows } from './keyboardWindowsController.js';
-
+import { sendCopyLinux, sendTextLinux, getLinuxWindowGeometry } from './linuxController.js';
+import { sendCopyWindows, sendTextWindows } from './windowsController.js';
 
 // Función para obtener el texto seleccionado
-export function getSelectedText() {
-    return new Promise((resolve) => {
-        // Simula un Ctrl+C (o Cmd+C en Mac)
-        sendCopyCommand().then(() => {
-            // Espera un poco para que el sistema copie el texto al portapapeles
-            setTimeout(() => {
-                // Lee el contenido del portapapeles
-                clipboard.read()
-                    .then((clipboardContent) => {
-                        // Devuelve el texto seleccionado o un string vacío si no hay texto
-                        resolve(clipboardContent.trim() ? clipboardContent : '');
-                    })
-                    .catch(() => {
-                        // Si hay un error al leer el portapapeles, devuelve un string vacío
-                        resolve('');
-                    });
-            }, 500); // Ajusta el tiempo si es necesario
-        });
+export async function getSelectedText() {
+    return new Promise((resolve, reject) => {
+        // Lee el contenido del portapapeles
+        clipboard.read()
+            .then((clipboardContent) => {
+                console.log('clipboardContent', clipboardContent);
+                resolve(clipboardContent.trim() ? clipboardContent : '');
+            })
+            .catch((e) => {
+                console.error(e);
+                // Si hay un error al leer el portapapeles, devuelve un string vacío
+                reject(e);
+            });
+
     });
 }
 
@@ -33,7 +28,24 @@ export async function sendCopyCommand() {
     } else if (platform === 'darwin') {
         sendCopyMac();
     } else if (platform === 'linux') {
-        sendCopyLinux();
+        await sendCopyLinux();
+    } else {
+        console.error('Sistema operativo no soportado');
+    }
+}
+
+export async function getWindowGeometry() {
+    const platform = process.platform;
+    let geom = {
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0
+    }
+    if (platform === 'win32' || platform === 'darwin') {
+        return geom;
+    } else if (platform === 'linux') {
+        return await getLinuxWindowGeometry();
     } else {
         console.error('Sistema operativo no soportado');
     }

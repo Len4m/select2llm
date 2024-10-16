@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventana Transparente</title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+        #mensaje {
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        #boton-cancelar {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #ff4c4c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        #boton-cancelar:hover {
+            background-color: #ff1f1f;
+        }
+    </style>
+</head>
+<body>
+    <div id="mensaje">Procesando su petición, por favor espere...<br>
+    <small>Atención: No utilice la aplicación mientras se está procesando su petición.</small></div>
+    <button id="boton-cancelar" onclick="cancelarProceso()">Cancelar</button>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        function cancelarProceso() {
+            ipcRenderer.send('cancelar-proceso');
+        }
+    </script>
+</body>
+</html>

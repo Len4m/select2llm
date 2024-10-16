@@ -1,6 +1,7 @@
 
 import ollama from 'ollama';
 import { sendText } from './keyboardController.js';
+import { globals } from '../globals.js';
 
 // Llamada a Ollama
 export async function callOllama(prompt, model = 'llama3.2:latest') {
@@ -8,20 +9,20 @@ export async function callOllama(prompt, model = 'llama3.2:latest') {
     try {
         const response = await ollama.chat({ model: model, messages: [message], stream: true })
         for await (const part of response) {
-            if (global.inferencia) {
+            if (globals.inferencia) {
                 await sendText(part.message.content)
             }
         }
-    } catch (_) {
-        // Error por cancelación
+    } catch (err) {
+        if (err.code !== 20) // Abort error
+            console.error(err);
     }
-    global.inferencia = false;
 }
 
-export function listOllama() {
+export async function listOllama() {
     let list = [];
     try {
-        list = ollama.list();
+        list = await ollama.list();
     } catch (error) {
         console.error('Error al listar modelos:', error);
     }
@@ -29,8 +30,8 @@ export function listOllama() {
 }
 
 export function cancelOllama() {
-    if (global.inferencia) {
-        global.inferencia = false;
+    if (globals.inferencia) {
+        globals.inferencia = false;
         try {
             ollama.abort();
         } catch (error) {

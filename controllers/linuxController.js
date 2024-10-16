@@ -1,5 +1,7 @@
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
+
 let wid;
+
 
 // Función para escapar caracteres especiales para bash y xdotool
 function escapeForBash(a) {
@@ -58,28 +60,63 @@ export function sendTextLinux(text) {
     });
 }
 
-export function sendCopyLinux() {
+
+export async function sendCopyLinux() {
     return new Promise((resolve, reject) => {
         // Primero, obtener el ID de la ventana
         exec('xdotool getwindowfocus', (error1, stdout1, stderr1) => {
             if (error1) {
-                console.error(`Error al obtener el ID de la ventana: ${error1}\n\n${stderr1}`);
-                return reject(error1);
+                return reject(new Error(`Error al obtener el ID de la ventana: ${error1}\n\n${stderr1}`));
             }
             wid = String(stdout1).trim();
-
+            if (!wid) {
+                return reject(new Error('Ventana no encontrada'));
+            }
+           
             // Luego, realizar la copia
-            exec(`xclip -out -selection primary | xclip -in -selection clipboard`, (error2, stdout2, stderr2) => {
+            exec(`xdotool key --clearmodifiers --window '${wid}' ctrl+c`, (error2) => {
                 if (error2) {
-                    console.error(`Error al copiar al portapapeles: ${error2}\n\n${stderr2}`);
-                    return reject(error2);
+                    return reject(new Error(`Error al copiar al portapapeles: ${error2}`));
                 }
-
+                console.log('ctrl+c enviado');
                 // Resuelve la promesa con el ID de la ventana
                 resolve();
             });
         });
     });
+}
+
+/*
+export async function sendCopyLinux() {
+    try {
+        wid =  execSync('xdotool getwindowfocus').toString().trim();
+        if (!wid) {
+            throw new Error('Ventana no encontrada');
+        }
+        execSync(`xdotool key --clearmodifiers --window '${wid}' ctrl+c`);
+    } catch (error) {
+        throw new Error(e);
+    }
+}
+*/
+
+export function getLinuxWindowGeometry() {
+    const cmd = `xdotool getwindowgeometry --shell ${wid}`;
+    const output = execSync(cmd).toString();
+    const geom = {};
+    const lines = output.split('\n');
+    for (let line of lines) {
+        if (line.startsWith('X=')) {
+            geom.x = parseInt(line.split('=')[1].trim());
+        } else if (line.startsWith('Y=')) {
+            geom.y = parseInt(line.split('=')[1].trim());
+        } else if (line.startsWith('WIDTH=')) {
+            geom.width = parseInt(line.split('=')[1].trim());
+        } else if (line.startsWith('HEIGHT=')) {
+            geom.height = parseInt(line.split('=')[1].trim());
+        }
+    }
+    return geom;
 }
 
 

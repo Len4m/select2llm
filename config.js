@@ -70,6 +70,7 @@ function renderShortcuts() {
             dialog.style.display = 'flex';
             document.getElementById('accept-confirm').setAttribute('data-index', index);
         };
+
         item.querySelector('.atajo-li').insertBefore(delBtn, item.querySelector('.atajo-li').firstChild);
         // Copy prompt btn
         const copyBtn = document.createElement('a');
