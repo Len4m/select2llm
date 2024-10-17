@@ -86,20 +86,6 @@ export async function sendCopyLinux() {
     });
 }
 
-/*
-export async function sendCopyLinux() {
-    try {
-        wid =  execSync('xdotool getwindowfocus').toString().trim();
-        if (!wid) {
-            throw new Error('Ventana no encontrada');
-        }
-        execSync(`xdotool key --clearmodifiers --window '${wid}' ctrl+c`);
-    } catch (error) {
-        throw new Error(e);
-    }
-}
-*/
-
 export function getLinuxWindowGeometry() {
     const cmd = `xdotool getwindowgeometry --shell ${wid}`;
     const output = execSync(cmd).toString();

@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
 import clipboard from 'clipboardy';
 import { sendCopyLinux, sendTextLinux, getLinuxWindowGeometry } from './linuxController.js';
-import { sendCopyWindows, sendTextWindows } from './windowsController.js';
+import { sendCopyWindows, sendTextWindows, getWindowsWindowGeometry } from './windowsController.js';
 
 // Función para obtener el texto seleccionado
 export async function getSelectedText() {
@@ -42,8 +42,10 @@ export async function getWindowGeometry() {
         width: 0,
         height: 0
     }
-    if (platform === 'win32' || platform === 'darwin') {
+    if (platform === 'darwin') {
         return geom;
+    } else if (platform === 'win32') {
+        return await getWindowsWindowGeometry();
     } else if (platform === 'linux') {
         return await getLinuxWindowGeometry();
     } else {

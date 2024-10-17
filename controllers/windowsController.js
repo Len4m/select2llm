@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const powerShellCopy = path.join(__dirname, '../bin/copy.ps1');
 const powerShellSendText = path.join(__dirname, '../bin/sendText.ps1');
+const powerShellWinGeo = path.join(__dirname, '../bin/windowGeometry.ps1');
 
 let hWnd;
 
@@ -61,4 +62,11 @@ export function sendTextWindows(text) {
             resolve();
         });
     });
+}
+
+export async function getWindowsWindowGeometry() {
+    const cmd = `powershell.exe -ExecutionPolicy Bypass -File ${powerShellWinGeo} -hwnd ${hWnd}`;
+    console.log(cmd);
+    const geom = JSON.parse(execSync(cmd).toString());
+    return geom;
 }

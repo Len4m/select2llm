@@ -29,11 +29,9 @@ param (
     [string]$Texto
 )
 
-
 if (-not $Texto) {
     exit 0
 }
-
 
 # Función para agregar métodos de User32.dll
 function Add-User32Functions {
@@ -79,15 +77,10 @@ while ($tiempoTranscurrido -lt $timeout) {
     $tiempoTranscurrido += $intervalo
 }
 
-
-
 if ($tiempoTranscurrido -ge $timeout) {
     Write-Error "No se pudo activar la ventana con hWnd $hWnd dentro del tiempo de espera."
     exit 1
 }
-
-
-
 
 # Carga el ensamblado necesario para enviar las teclas
 Add-Type -AssemblyName System.Windows.Forms

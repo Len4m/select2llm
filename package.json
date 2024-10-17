@@ -37,10 +37,7 @@
       "target": ["AppImage"]
     },
     "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ]
+      "target": "nsis"
     }
   }
 }
