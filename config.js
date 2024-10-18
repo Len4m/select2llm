@@ -117,6 +117,8 @@ document.getElementById('shortcut-form').addEventListener('submit', (event) => {
     document.getElementById('alt').checked = true;
     document.getElementById('prompt').value = '';
     document.getElementById('temperature').value = 0.8;
+    document.getElementById('temperatura-span').innerText = 0.8;
+    
 });
 
 // Guardar los atajos y renderizar la lista actualizada
@@ -169,5 +171,4 @@ switch (navigator.language.substring(0, 2)) {
 
         break;
     default:
-
 }
