@@ -59,6 +59,7 @@ function renderShortcuts() {
         atajoHtml += `<span class="key" style="font-weight: bold;font-size:120%;">${shortcut.key}</span>`;
         item.querySelector('.atajo-atajo').innerHTML = atajoHtml;
         item.querySelector('.atajo-model').appendChild(document.createTextNode(shortcut.model));
+        item.querySelector('.atajo-temp').appendChild(document.createTextNode(shortcut.temperature));
         item.querySelector('p').innerHTML = htmlencode(shortcut.prompt).replace(/\n/g, "<br>");
         // Del btn
         const delBtn = document.createElement('a');
@@ -95,6 +96,7 @@ document.getElementById('shortcut-form').addEventListener('submit', (event) => {
     const alt = document.getElementById('alt').checked;
     const prompt = document.getElementById('prompt').value.trim() || '%s';
     const model = document.getElementById('model').value;
+    const temperature = document.getElementById('temperature').value;
 
     // Añadir nueva combinación de atajo con prompt
     shortcuts.push({
@@ -103,7 +105,8 @@ document.getElementById('shortcut-form').addEventListener('submit', (event) => {
         alt: alt,
         key: key,
         prompt: prompt,
-        model: model
+        model: model,
+        temperature: temperature
     });
     saveAndRender();
 
@@ -113,6 +116,7 @@ document.getElementById('shortcut-form').addEventListener('submit', (event) => {
     document.getElementById('shift').checked = true;
     document.getElementById('alt').checked = true;
     document.getElementById('prompt').value = '';
+    document.getElementById('temperature').value = 0.8;
 });
 
 // Guardar los atajos y renderizar la lista actualizada

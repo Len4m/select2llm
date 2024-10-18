@@ -87,7 +87,7 @@ function callShortcut(combination, startCallBack, shortcut, stopCallBack) {
                 console.log(`Prompt (${shortcut.model}): ${message}`);
                 
                 // Llamar a Ollama para procesar el mensaje
-                await callOllama(message, shortcut.model);
+                await callOllama(message, shortcut.model, shortcut.temperature);
                 
                 if (stopCallBack) await stopCallBack();
             }

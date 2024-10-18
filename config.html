@@ -52,6 +52,11 @@
                 </label>
             </div>
             <label for="model">Modelo</label> <select id="model" name="model" required></select>
+            <br>
+            <label for="temperature">Temperatura (<span id="temperatura-span">0.8</span>)</label>
+            <div id="temperature-div">
+                <input oninput="document.getElementById('temperatura-span').innerText = this.value" type="range" min="0" max="1" step="0.01" value="0.8" id="temperature" name="temperature" required>
+            </div>
             <textarea id="prompt" name="prompt"></textarea>
             <button type="submit" class="pure-button pure-button-primary"
                 style="border-radius: 4px;margin-top:15px;">Agregar</button>
@@ -68,7 +73,7 @@
     <template id="prompts-items" style="display:none;">
         <li class="atajo-li">
             <div class="atajo-atajo"></div>
-            <span class="atajo-model"></span>
+            <span class="atajo-model"></span> (Temp. <span class="atajo-temp"></span>)
             <p></p>
         </li>
     </template>

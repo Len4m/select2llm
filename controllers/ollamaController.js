@@ -4,13 +4,21 @@ import { sendText } from './keyboardController.js';
 import { globals } from '../globals.js';
 
 // Llamada a Ollama
-export async function callOllama(prompt, model = 'llama3.2:latest') {
-    const message = { role: 'user', content: prompt }
+export async function callOllama(prompt, model = 'llama3.2:latest', temperature = 0.8) {
+
     try {
-        const response = await ollama.chat({ model: model, messages: [message], stream: true })
+        console.log(temperature);
+        const response = await ollama.generate({
+            model: model,
+            prompt: prompt,
+            stream: true,
+            options: {
+                temperature: parseFloat(temperature)
+            }
+        })
         for await (const part of response) {
             if (globals.inferencia) {
-                await sendText(part.message.content)
+                await sendText(part.response);
             }
         }
     } catch (err) {

@@ -276,3 +276,10 @@ div.atajo-atajo>span.key {
     text-decoration: none;
     cursor: pointer;
 }
+
+
+#temperature {
+    width:250px;
+    height: 25px;
+    margin-bottom: 10px;
+}
