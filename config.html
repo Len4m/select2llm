@@ -28,6 +28,7 @@
         </ul>
     </div>
     <form id="shortcut-form" class="pure-form" style="padding: 0 15px;">
+        <input type="hidden" name="index" id="index" value="">
         <fieldset>
             <legend>Configuración de atajos</legend>
             <div class="config-short">
@@ -58,8 +59,10 @@
                 <input oninput="document.getElementById('temperatura-span').innerText = this.value" type="range" min="0" max="1" step="0.01" value="0.8" id="temperature" name="temperature" required>
             </div>
             <textarea id="prompt" name="prompt"></textarea>
-            <button type="submit" class="pure-button pure-button-primary"
+            <button id="add-btn" type="submit" class="pure-button pure-button-primary"
                 style="border-radius: 4px;margin-top:15px;">Agregar</button>
+                <button id="cancel-btn" type="button" class="pure-button-secondary pure-button"
+                    style="border-radius: 4px;margin-top:15px;">Cancelar</button>
         </fieldset>
     </form>
 
