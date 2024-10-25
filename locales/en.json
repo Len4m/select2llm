@@ -17,5 +17,11 @@
   "Modelo": "Model",
   "Cancelar": "Cancel",
   "Eliminar atajo": "Delete Shortcut",
-  "Listado de atajos": "Shortcut List"
+  "Listado de atajos": "Shortcut List",
+  "Seguro que quiere eliminar el atajo?": "Are you sure you want to delete the shortcut?",
+  "Agregar": "Add",
+  "Editar": "Edit",
+  "Settings (click)": "[Settings (click)]",
+  "Cancel (double click)": "[Cancel (double click)]",
+  "Exit": "[Exit]"
 }

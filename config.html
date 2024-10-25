@@ -82,16 +82,21 @@
             </div>
             <textarea id="prompt" name="prompt"></textarea>
             <button id="add-btn" type="submit" class="pure-button pure-button-primary"
-                style="border-radius: 4px;margin-top:15px;">Agregar</button>
+                style="border-radius: 4px;margin-top:15px;" data-i18n="Agregar"></button>
+
+                <button id="edit-btn" type="submit" class="pure-button pure-button-primary"
+                    style="border-radius: 4px;margin-top:15px;" data-i18n="Editar"></button>
+
             <button id="cancel-btn" type="button" class="pure-button-secondary pure-button"
                 data-i18n="Cancelar"></button>
+
             <a href="#" id="global-settings-btn" class="global-settings-btn" data-i18n="Configuración global"></a>
         </fieldset>
     </form>
 
     <div id="del-confirm" class="confirm">
         <div>
-            <p>Seguro que quiere eliminar el atajo?</p>
+            <p data-i18n="Seguro que quiere eliminar el atajo?"></p>
             <button class="button-error pure-button" id="accept-confirm" data-index="0"
                 data-i18n="Eliminar atajo"></button>
             <button class="pure-button-secondary pure-button"

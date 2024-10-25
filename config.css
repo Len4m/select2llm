@@ -1,16 +1,13 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #c8d0c9;
-    padding: 20px;
     margin: 0;
     padding: 0;
 }
 
 h1 {
     color: #333;
-    margin: 0;
     display: flex;
-    color: black;
     -webkit-text-stroke: 1px black;
     font-weight: bold;
 }
@@ -69,8 +66,6 @@ button {
     gap: 10px;
 }
 
-
-
 .flex-container {
     display: flex;
     flex-direction: row;
@@ -102,26 +97,25 @@ button {
 
 .pure-form legend {
     border-bottom: none;
-    margin: 0 0 0 0;
-    padding: 0 0 0 0;
+    margin: 0;
+    padding: 0;
     font-weight: bold;
 }
 
 div.key-check {
     display: inline-block;
-
 }
 
-div.key-check input[type=checkbox] {
+div.key-check input[type="checkbox"] {
     display: none;
     height: auto;
 }
 
-div.key-check input[type=checkbox]+label img {
+div.key-check input[type="checkbox"] + label img {
     opacity: 0.3;
 }
 
-div.key-check input[type=checkbox]:checked+label img {
+div.key-check input[type="checkbox"]:checked + label img {
     opacity: 1;
 }
 
@@ -136,7 +130,7 @@ div.key-check img {
     align-items: center;
 }
 
-.config-short>* {
+.config-short > * {
     margin-right: 10px;
 }
 
@@ -147,11 +141,10 @@ textarea#prompt {
     height: 75px;
     min-height: 55px;
     resize: vertical;
-
 }
 
 .atajo-li {
-    display: block
+    display: block;
 }
 
 a.atajo-btn {
@@ -178,14 +171,14 @@ span.atajo-model {
     display: inline-block;
 }
 
-li.atajo-li>p {
+li.atajo-li > p {
     margin: 10px 0 15px 0;
 }
 
 div.atajo-atajo {
     display: flex;
     align-items: center;
-    justify-content: start
+    justify-content: start;
 }
 
 img.atajo-key {
@@ -200,12 +193,10 @@ img.atajo-plus {
     margin-right: 10px;
 }
 
-div.atajo-atajo>span.key {
+div.atajo-atajo > span.key {
     font-weight: bold;
     font-size: 120%;
 }
-
-
 
 .button-success,
 .button-error,
@@ -237,7 +228,6 @@ div.atajo-atajo>span.key {
 }
 
 .confirm {
-    /* flex;*/
     display: none;
     position: fixed;
     top: 0;
@@ -245,12 +235,11 @@ div.atajo-atajo>span.key {
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-
     align-items: center;
-    justify-content: center
+    justify-content: center;
 }
 
-.confirm>div {
+.confirm > div {
     background-color: white;
     text-align: center;
     padding: 0 15px 15px 15px;
@@ -266,7 +255,6 @@ div.atajo-atajo>span.key {
 }
 
 .pure-button-secondary {
-
     color: white;
     background-color: #2c9bb488;
 }
@@ -284,7 +272,6 @@ div.atajo-atajo>span.key {
     text-decoration: none;
     cursor: pointer;
 }
-
 
 #temperature {
     width: 250px;
@@ -306,21 +293,16 @@ div.atajo-atajo>span.key {
 }
 
 #cancel-btn {
-
     border-radius: 4px;
     margin-top: 15px;
     display: none;
     text-align: right;
 }
 
-
-
 #global-config-form {
-
     min-width: 430px;
     margin-top: 20px;
     position: relative;
-
 }
 
 #global-config-form select {
@@ -331,7 +313,7 @@ div.atajo-atajo>span.key {
     width: 5em;
 }
 
-#global-config-form>fieldset>legend {
+#global-config-form > fieldset > legend {
     font-size: 18px;
     padding-bottom: 15px;
 }
@@ -340,8 +322,8 @@ div.atajo-atajo>span.key {
     width: 20px;
     height: auto;
     position: absolute;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
     opacity: 0.6;
     cursor: pointer;
 }
@@ -356,7 +338,7 @@ div.atajo-atajo>span.key {
 
 #global-config-box {
     text-align: left;
-    margin: 15px 15px 15px 15px;
+    margin: 15px;
 }
 
 #global-config-form legend {
@@ -365,7 +347,7 @@ div.atajo-atajo>span.key {
 
 #global-config-box label {
     width: 100%;
-    margin: 15px 0px 5px 0px;
+    margin: 15px 0 5px 0;
     font-weight: 700;
 }
 

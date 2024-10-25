@@ -17,5 +17,11 @@
   "Modelo": "Model",
   "Cancelar": "Cancel·lar",
   "Eliminar atajo": "Eliminar drecera",
-  "Listado de atajos": "Llistat de dreceres"
+  "Listado de atajos": "Llistat de dreceres",
+  "Seguro que quiere eliminar el atajo?": "Segur que voleu eliminar la drecera?",
+  "Agregar": "Afegir",
+  "Editar": "Editar",
+  "Settings (click)": "[Settings (click)]",
+  "Cancel (double click)": "[Cancel (double click)]",
+  "Exit": "[Exit]"
 }

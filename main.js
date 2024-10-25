@@ -9,9 +9,7 @@ import { getWindowGeometry } from './controllers/keyboardController.js';
 import { globals } from './globals.js';
 import i18n from './i18n.js';
 
-
-
-// Obtener la ruta del directorio actual
+// Get the path of the current directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -24,8 +22,9 @@ let configWindow = null,
     animationInterval,
     clickTimeout;
 
+// Hide or show configuration window
 function hideShowConfig() {
-    // Restaurar/mostrar la ventana principal si está oculta/minimizada
+    // Restore/show the main window if it is hidden/minimized
     if (configWindow.isVisible()) {
         configWindow.hide();
     } else {
@@ -34,87 +33,86 @@ function hideShowConfig() {
     }
 }
 
-async function crearVentanaTransparente(obj) {
-    // Crear una nueva ventana transparente
+// Create transparent window
+async function createTransparentWindow(obj) {
     transparentWindow = await createOverlayWindow(obj);
 }
 
-function quitarVentanaTransparente() {
+// Remove transparent window
+function removeTransparentWindow() {
     if (transparentWindow) {
         transparentWindow.close();
         transparentWindow = null;
     }
 }
 
-// Función para obtener el camino del icono actual
+// Function to get the path of the current icon
 function getIconPath(index) {
     const indexString = index < 10 ? `0${index}` : `${index}`;
     return path.join(__dirname, `images/animation/frame_${indexString}_delay-0.06s.png`);
 }
 
-async function startInferencia() {
-    if (animationInterval)
-        clearInterval(animationInterval);
+// Start inference process
+async function startInference() {
+    if (animationInterval) clearInterval(animationInterval);
     animationInterval = setInterval(() => {
         iconIndex = ((iconIndex + 1) % 20);
         tray.setImage(getIconPath(iconIndex));
     }, 150);
-    // Create hiden window
+    // Create hidden window
     let geo = await getWindowGeometry();
-    crearVentanaTransparente(geo);
+    createTransparentWindow(geo);
     globals.inferencia = true;
 }
 
-async function stopInferencia() {
-    if (animationInterval)
-        clearInterval(animationInterval);
+// Stop inference process
+async function stopInference() {
+    if (animationInterval) clearInterval(animationInterval);
     tray.setImage(getIconPath(0));
-    quitarVentanaTransparente();
+    removeTransparentWindow();
     globals.inferencia = false;
 }
 
-// Comunicación desde la ventana de configuración para guardar los atajos
+// Communication from the configuration window to save shortcuts
 ipcMain.on('save-shortcuts', async (event, shortcuts) => {
     saveShortcuts(shortcuts);
     let ollamaIsOk = await checkApi();
     if (ollamaIsOk) {
-        registerShortcuts(startInferencia, stopInferencia);
+        registerShortcuts(startInference, stopInference);
     }
 });
 
-// Author link
+// Handle external link navigation
 ipcMain.on('external-link', (event, url) => {
     shell.openExternal(url);
 });
 
-// Manejar el evento de cancelación desde el frontend
+// Handle the cancel event from the frontend
 ipcMain.on('cancelar-proceso', () => {
     cancelOllama();
-    quitarVentanaTransparente();
+    removeTransparentWindow();
 });
 
-
-// Escucha los eventos de traducción del proceso de renderizado
+// Listen for translation events from the renderer process
 ipcMain.on('get-translation', (event, key) => {
     const translation = i18n.t(key);
     event.reply('translation', { key, translation });
 });
 
-// Cambiar el idioma desde el renderizado y recargar traducciones
+// Change the language from the renderer and reload translations
 ipcMain.on('change-language', (event, language) => {
     i18n.setLanguage(language);
-    configWindow.webContents.send('language-changed', i18n.translations); // Enviar todas las traducciones al renderizador
+    configWindow.webContents.send('language-changed', i18n.translations); // Send all translations to the renderer
 });
 
-
-// Comunicación desde la ventana de configuración para guardar los atajos
+// Save configuration from the configuration window
 ipcMain.on('save-config', (event, config) => globals.saveConfig(config));
 
+// App initialization
 app.whenReady().then(async () => {
-
     const ollamaIsOk = await checkApi();
 
-    // Crear un icono de estado (tray)
+    // Create a tray icon
     tray = new Tray(getIconPath(0));
 
     const contextMenu = Menu.buildFromTemplate([
@@ -142,11 +140,11 @@ app.whenReady().then(async () => {
     tray.setToolTip('Select2LLM');
     tray.setContextMenu(contextMenu);
 
-
     configWindow = await createConfigWindow(ollamaIsOk);
     if (ollamaIsOk) {
         configWindow.hide();
     }
+
     let clickCount = 0;
     tray.on('click', (event, bounds) => {
         clickCount++;
@@ -158,22 +156,22 @@ app.whenReady().then(async () => {
                 return;
             }
             hideShowConfig();
-            clickCount = 0; // Reiniciar el contador
+            clickCount = 0; // Reset the counter
         }, 300);
     });
 
-    // Registrar atajos desde el archivo JSON
+    // Register shortcuts from the JSON file
     if (ollamaIsOk) {
-        registerShortcuts(startInferencia, stopInferencia);
+        registerShortcuts(startInference, stopInference);
     }
-    // Para asegurar que la aplicación siga funcionando en segundo plano
+
+    // Ensure the app continues running in the background
     app.on('activate', async () => {
         if (BrowserWindow.getAllWindows().length === 0) configWindow = await createConfigWindow();
     });
 });
 
+// Unregister all shortcuts when the app is closed
 app.on('will-quit', () => {
-    // Desregistrar todos los atajos cuando se cierra la app
     globalShortcut.unregisterAll();
 });
-
