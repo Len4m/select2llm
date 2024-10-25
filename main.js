@@ -9,9 +9,16 @@ import { getWindowGeometry } from './controllers/keyboardController.js';
 import { globals } from './globals.js';
 import i18n from './i18n.js';
 
+// Only one instance
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit()
+}
+
 // Get the path of the current directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 
 Menu.setApplicationMenu(null);
 
