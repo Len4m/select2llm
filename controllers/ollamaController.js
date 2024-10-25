@@ -1,17 +1,20 @@
 
-import ollama from 'ollama';
+import { Ollama } from 'ollama';
 import { sendText } from './keyboardController.js';
 import { globals } from '../globals.js';
+import http from 'http';
+
+const ollama = new Ollama({ host: globals.host })
 
 // Llamada a Ollama
 export async function callOllama(prompt, model = 'llama3.2:latest', temperature = 0.8) {
-
     try {
-        console.log(temperature);
+        ollama.host = globals.host;
         const response = await ollama.generate({
             model: model,
             prompt: prompt,
             stream: true,
+            keep_alive: globals['keep-alive'] + 'm', // minutes
             options: {
                 temperature: parseFloat(temperature)
             }
@@ -37,15 +40,46 @@ export async function listOllama() {
     return list;
 }
 
-export function cancelOllama() {
+export  function  cancelOllama() {
     if (globals.inferencia) {
         globals.inferencia = false;
         try {
-            ollama.abort();
+             ollama.abort();
         } catch (error) {
             console.error('Error al cancelar:', error);
             return;
         }
         console.log("Petición cancelada");
     }
+}
+
+
+export function checkApi() {
+    return new Promise((resolve) => {
+        let host = globals.host==''?'http://127.0.0.1:11434':globals.host;
+        
+        const req = http.get(host, (res) => {
+            let data = '';
+
+            // Escucha los datos entrantes del body de la respuesta
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+
+            // Cuando termina de recibir los datos, verifica el contenido
+            res.on('end', () => {
+                if (res.statusCode === 200 && data.trim() === "Ollama is running") {
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+
+        // Manejador de errores
+        req.on('error', () => {
+            resolve(false);
+        });
+        req.end();
+    });
 }

@@ -21,6 +21,19 @@
     </div>
 
     <div style="padding:0 15px;">
+        <div class="ollama-alert">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="#FFFFFF" stroke-width="2" fill="none" />
+                <path d="M12 7v6" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
+                <circle cx="12" cy="17" r="1" fill="#FFFFFF" />
+            </svg>
+            <div class="message">No se ha encontrado la API de Ollama. Asegúrese de tener Ollama instalado (<span
+                    class="ollama-download-link">ollama.com/download</span>) y de que el host esté correctamente
+                configurado en la <span class="global-settings-btn">configuración global</span>.</div>
+            <div style="clear:both"></div>
+        </div>
+
+
         <h3 style="margin:0px 0px 15px 0px;">Listado de atajos</h3>
         <ul id="shortcuts-list">
             <li>Cargando ...</li>
@@ -54,16 +67,16 @@
             </div>
             <label for="model">Modelo</label> <select id="model" name="model" required></select>
             <br>
-            <label for="temperature">Temperatura (<span id="temperatura-span">0.8</span>)</label>
+            <label for="temperature">Temperatura (<span id="temperatura-span"></span>)</label>
             <div id="temperature-div">
                 <input oninput="document.getElementById('temperatura-span').innerText = this.value" type="range" min="0"
-                    max="1" step="0.01" value="0.8" id="temperature" name="temperature" required>
+                    max="1" step="0.01" id="temperature" name="temperature" required>
             </div>
             <textarea id="prompt" name="prompt"></textarea>
             <button id="add-btn" type="submit" class="pure-button pure-button-primary"
                 style="border-radius: 4px;margin-top:15px;">Agregar</button>
             <button id="cancel-btn" type="button" class="pure-button-secondary pure-button">Cancelar</button>
-            <a href="#" id="global-settings-btn">Configuración global</a>
+            <a href="#" id="global-settings-btn" class="global-settings-btn">Configuración global</a>
         </fieldset>
     </form>
 
@@ -105,7 +118,7 @@
                         name="keep-alive" required>
                     <span class="pure-form-message-inline">Controla cuánto tiempo el modelo permanecerá cargado en la
                         memoria después de la solicitud</span>
-                    <label for="global-config-host">API Host</label>
+                    <label for="global-config-host">Ollama API Host</label>
                     <input placeholder="http://127.0.0.1:11434" style="width:100%;" type="url" name="host"
                         id="global-config-host" value="http://127.0.0.1:11434">
                     <span class="pure-form-message-inline">Por defecto http://127.0.0.1:11434</span>
@@ -123,7 +136,7 @@
         </li>
     </template>
 
-    
+
     <script src="config.js"></script>
 </body>
 

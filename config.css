@@ -355,13 +355,34 @@ div.atajo-atajo>span.key {
 }
 
 #global-config-box {
-    text-align:left;
+    text-align: left;
 }
+
 #global-config-form legend {
     padding-bottom: 0 !important;
 }
+
 #global-config-box label {
-    width:100%;
-    margin:15px 0px 5px 0px;
+    width: 100%;
+    margin: 15px 0px 5px 0px;
     font-weight: 700;
+}
+
+.ollama-alert {
+    display: none;
+    border-radius: 5px;
+    padding: 15px;
+    background-color: #ff4444;
+    color: white;
+    margin-bottom:15px;
+}
+
+.ollama-alert span {
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.ollama-alert svg {
+    float: left;
+    margin-right: 15px;
 }

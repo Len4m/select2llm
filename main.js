@@ -4,12 +4,9 @@ import { fileURLToPath } from 'url';
 import { createConfigWindow } from './windows/configWindow.js';
 import { createOverlayWindow } from './windows/overlayWindow.js';
 import { registerShortcuts, saveShortcuts } from './controllers/shortcutsController.js';
-import { cancelOllama } from './controllers/ollamaController.js';
+import { cancelOllama, checkApi } from './controllers/ollamaController.js';
 import { getWindowGeometry } from './controllers/keyboardController.js';
 import { globals } from './globals.js';
-
-
-
 
 // Obtener la ruta del directorio actual
 const __filename = fileURLToPath(import.meta.url);
@@ -23,8 +20,6 @@ let configWindow = null,
     iconIndex = 0,
     animationInterval,
     clickTimeout;
-
-
 
 function hideShowConfig() {
     // Restaurar/mostrar la ventana principal si está oculta/minimizada
@@ -47,7 +42,6 @@ function quitarVentanaTransparente() {
         transparentWindow = null;
     }
 }
-
 
 // Función para obtener el camino del icono actual
 function getIconPath(index) {
@@ -94,10 +88,16 @@ ipcMain.on('cancelar-proceso', () => {
 });
 
 
+
+
+
 // Comunicación desde la ventana de configuración para guardar los atajos
 ipcMain.on('save-config', (event, config) => globals.saveConfig(config));
 
 app.whenReady().then(async () => {
+
+    const ollamaIsOk = await checkApi();
+    
     // Crear un icono de estado (tray)
     tray = new Tray(getIconPath(0));
 
@@ -110,7 +110,7 @@ app.whenReady().then(async () => {
         },
         {
             label: 'Cancelar (doble click)',
-            click: async () => {
+            click: () => {
                 cancelOllama();
             },
             enabled: true // TODO
@@ -127,7 +127,7 @@ app.whenReady().then(async () => {
     tray.setContextMenu(contextMenu);
 
 
-    configWindow = await createConfigWindow();
+    configWindow = await createConfigWindow(ollamaIsOk);
     configWindow.hide();
 
     let clickCount = 0;

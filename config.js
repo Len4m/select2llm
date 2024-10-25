@@ -2,6 +2,13 @@ const { clipboard, ipcRenderer } = require('electron');
 const platform = process.platform;
 let shortcuts = [];
 let models = [];
+let global_config = {
+    language: 'es',
+    temperature: 0.8,
+    'keep-alive': 5,
+    host: 'http://127.0.0.1:11434',
+};
+
 
 if (platform === 'darwin') {
     document.getElementById('ctrl-button').src = 'images/command-button-icon.png';
@@ -21,21 +28,32 @@ ipcRenderer.on('load-models', (event, loadModels) => {
 
 // Cargar configuración
 ipcRenderer.on('load-config', (event, config) => {
-    setFormData(config);
+    global_config = config;
+    setConfigFormData(config);
+    clearForm();
+});
+
+
+// ollama-is-ok
+ipcRenderer.on('load-ollama-ok', (event, isOk) => {
+    if (!isOk) {
+        document.getElementsByClassName('ollama-alert')[0].style.display = 'block';
+        document.getElementById('global-config-host').style.borderColor = 'red';
+    }
 });
 
 // Función para establecer los valores del formulario desde un objeto
-function setFormData(data) {
+function setConfigFormData(data) {
     for (const key in data) {
-      if (data.hasOwnProperty(key)) {
-        const element = form.querySelector(`[name="${key}"]`);
-        if (element) {
-          element.value = data[key];
+        if (data.hasOwnProperty(key)) {
+            const element = form.querySelector(`[name="${key}"]`);
+            if (element) {
+                element.value = data[key];
+            }
         }
-      }
     }
     document.getElementById('global-config-temperatura-span').innerText = data.temperature;
-  }
+}
 
 function htmlencode(str) {
     var div = document.createElement('div');
@@ -127,13 +145,11 @@ function clearForm() {
     document.getElementById('shift').checked = true;
     document.getElementById('alt').checked = true;
     document.getElementById('prompt').value = '';
-    document.getElementById('temperature').value = 0.8;
-    document.getElementById('temperatura-span').innerText = 0.8;
+    document.getElementById('temperature').value = global_config.temperature;
+    document.getElementById('temperatura-span').innerText = global_config.temperature;
     document.getElementById('add-btn').innerText = "Agregar";
     document.getElementById('cancel-btn').style.display = '';
 }
-
-
 
 function edit_shortcut(index) {
     let shortcut = shortcuts[index];
@@ -152,19 +168,12 @@ function edit_shortcut(index) {
 }
 document.getElementById('cancel-btn').addEventListener('click', () => clearForm());
 
-document.getElementById('global-settings-btn').addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('global-config').style.display = 'flex';
-
+Array.from(document.getElementsByClassName('global-settings-btn')).forEach((a) => {
+    a.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('global-config').style.display = 'flex';
+    });
 });
-
-document.getElementById('global-config-form').addEventListener('submit', (event) => {
-    event.preventDefault();
-    alert('save settings');
-
-});
-
-
 
 // Manejar envío del formulario para agregar un nuevo atajo
 document.getElementById('shortcut-form').addEventListener('submit', (event) => {
@@ -177,7 +186,6 @@ document.getElementById('shortcut-form').addEventListener('submit', (event) => {
     const prompt = document.getElementById('prompt').value.trim() || '%s';
     const model = document.getElementById('model').value;
     const temperature = document.getElementById('temperature').value;
-
 
     if (index == "") {
         // Validate
@@ -234,6 +242,7 @@ document.getElementById('shortcut-form').addEventListener('submit', (event) => {
 // Guardar los atajos y renderizar la lista actualizada
 function saveAndRender() {
     ipcRenderer.send('save-shortcuts', shortcuts);
+
     renderShortcuts();
 }
 
@@ -252,6 +261,15 @@ document.getElementById('accept-confirm').addEventListener('click', (event) => {
 document.getElementById('author-link').addEventListener('click', (event) => {
     ipcRenderer.send('external-link', 'https://len4m.github.io/?select2llm');
 });
+
+
+Array.from(document.getElementsByClassName('ollama-download-link')).forEach((element) => {
+    element.addEventListener('click', (event) => {
+        event.preventDefault();
+        ipcRenderer.send('external-link', 'https://ollama.com/download');
+    });
+});
+
 
 document.getElementById('key').addEventListener('focus', () => document.getElementById('key').select());
 
@@ -287,8 +305,6 @@ globalConfigDiv.addEventListener('click', function (event) {
     }
 });
 
-
-
 // Global config form:
 const form = document.getElementById("global-config-form");
 // Función para obtener los valores del formulario y generar el objeto
@@ -299,13 +315,18 @@ function getFormData() {
         // Convertir "temperature" y "keep-alive" a números
         if (key === "temperature") {
             data[key] = parseFloat(value);
-          } else if (key === "keep-alive") {
+        } else if (key === "keep-alive") {
             data[key] = parseInt(value, 10);
-          } else {
+        } else {
             data[key] = value;
-          }
+        }
     });
+    global_config = data;
     ipcRenderer.send('save-config', data);
+    clearForm();
 }
 // Agregar event listener al formulario para detectar cambios
 form.addEventListener("change", getFormData);
+
+clearForm();
+

@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Crear ventana de configuración
-export async function createConfigWindow() {
+export async function createConfigWindow(ollamaIsOk) {
     let configWindow;
     try {
         configWindow = await new Promise((resolve, reject) => {
@@ -51,8 +51,12 @@ export async function createConfigWindow() {
                     'keep-alive': globals['keep-alive'],
                     host: globals.host === '' ? 'http://127.0.0.1:11434' : globals.host
                 });
+                win.webContents.send('load-ollama-ok', ollamaIsOk);
                 win.webContents.send('load-shortcuts', loadShortcuts());
-                win.webContents.send('load-models', await listOllama());
+
+                if (ollamaIsOk) {
+                    win.webContents.send('load-models', await listOllama());
+                }
             });
 
             win.on('close', (event) => {
