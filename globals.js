@@ -2,6 +2,7 @@
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import { app } from 'electron';
 
 // Ruta de la carpeta de configuración del usuario
 const userConfigDir = path.join(os.homedir(), '.select2llm');
@@ -42,10 +43,19 @@ export const globals = {
 
   // Guarda la configuración proporcionada en el archivo config.json y actualiza la variable en memoria
   saveConfig: (newConfig) => {
+    let actual_host = currentConfig.host;
     try {
       currentConfig = { ...currentConfig, ...newConfig };
       fs.writeFileSync(configFilePath, JSON.stringify(currentConfig, null, 2));
       Object.assign(globals, currentConfig);
+
+      if (actual_host !== currentConfig.host) {
+        setTimeout(() => {
+          app.relaunch(); // Reinicia la aplicación
+          app.exit(0);    // Cierra la aplicación actual para que la reinicie
+        }, 1500);
+      }
+
     } catch (err) {
       console.error('Error al guardar la configuración:', err);
     }

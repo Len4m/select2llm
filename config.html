@@ -27,23 +27,31 @@
                 <path d="M12 7v6" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" />
                 <circle cx="12" cy="17" r="1" fill="#FFFFFF" />
             </svg>
-            <div class="message">No se ha encontrado la API de Ollama. Asegúrese de tener Ollama instalado (<span
-                    class="ollama-download-link">ollama.com/download</span>) y de que el host esté correctamente
+            <div class="message" data-i18n-lan="es">No se ha encontrado la API de Ollama. Asegúrese de tener Ollama
+                instalado (<span class="ollama-download-link">ollama.com/download</span>) y de que el host esté
+                correctamente
                 configurado en la <span class="global-settings-btn">configuración global</span>.</div>
+            <div class="message" data-i18n-lan="ca">No s'ha trobat l'API d'Ollama. Assegureu-vos de tenir Ollama
+                instal·lat (<span class="ollama-download-link">ollama.com/download</span>) i que l'host estigui
+                correctament
+                configurat a la <span class="global-settings-btn">configuració global</span>.</div>
+            <div class="message" data-i18n-lan="en">Ollama API not found. Make sure you have Ollama
+                installed (<span class="ollama-download-link">ollama.com/download</span>) and that the host is correctly
+                configured in <span class="global-settings-btn">global settings</span>.</div>
+
             <div style="clear:both"></div>
         </div>
 
 
-        <h3 style="margin:0px 0px 15px 0px;">Listado de atajos</h3>
+        <h3 style="margin:0px 0px 15px 0px;" data-i18n="Listado de atajos"></h3>
         <ul id="shortcuts-list">
-            <li>Cargando ...</li>
-
+            <li data-i18n="Cargando ..."></li>
         </ul>
     </div>
     <form id="shortcut-form" class="pure-form" style="padding: 0 15px;">
         <input type="hidden" name="index" id="index" value="">
         <fieldset>
-            <legend>Configuración de atajos</legend>
+            <legend data-i18n="Configuración de atajos"></legend>
             <div class="config-short">
                 <div class="key-check">
                     <input type="checkbox" id="ctrl" name="ctrl" checked>
@@ -62,12 +70,12 @@
                 <label>
                     <input type="text" id="key" name="key" style="max-width:32px;font-weight: bold;" maxlength="1"
                         pattern="[a-zA-Z0-9\+\-.,¡'/*]" required>
-                    <small>Tecla (alfanumérica o +-.,¡'/*)</small>
+                    <small data-i18n="Tecla (alfanumérica o +-.,¡'/*)"></small>
                 </label>
             </div>
-            <label for="model">Modelo</label> <select id="model" name="model" required></select>
+            <label for="model" data-i18n="Modelo"></label> <select id="model" name="model" required></select>
             <br>
-            <label for="temperature">Temperatura (<span id="temperatura-span"></span>)</label>
+            <label for="temperature"><span data-i18n="Temperatura"></span> (<span id="temperatura-span"></span>)</label>
             <div id="temperature-div">
                 <input oninput="document.getElementById('temperatura-span').innerText = this.value" type="range" min="0"
                     max="1" step="0.01" id="temperature" name="temperature" required>
@@ -75,17 +83,19 @@
             <textarea id="prompt" name="prompt"></textarea>
             <button id="add-btn" type="submit" class="pure-button pure-button-primary"
                 style="border-radius: 4px;margin-top:15px;">Agregar</button>
-            <button id="cancel-btn" type="button" class="pure-button-secondary pure-button">Cancelar</button>
-            <a href="#" id="global-settings-btn" class="global-settings-btn">Configuración global</a>
+            <button id="cancel-btn" type="button" class="pure-button-secondary pure-button"
+                data-i18n="Cancelar"></button>
+            <a href="#" id="global-settings-btn" class="global-settings-btn" data-i18n="Configuración global"></a>
         </fieldset>
     </form>
 
     <div id="del-confirm" class="confirm">
         <div>
             <p>Seguro que quiere eliminar el atajo?</p>
-            <button class="button-error pure-button" id="accept-confirm" data-index="0">Eliminar atajo</button>
+            <button class="button-error pure-button" id="accept-confirm" data-index="0"
+                data-i18n="Eliminar atajo"></button>
             <button class="pure-button-secondary pure-button"
-                onclick="document.getElementById('del-confirm').style.display = '';">Cancelar</button>
+                onclick="document.getElementById('del-confirm').style.display = '';" data-i18n="Cancelar"></button>
         </div>
     </div>
 
@@ -97,31 +107,34 @@
                 <fieldset>
                     <legend>
                         <img src="images/settings-icon.png" style="max-width:25px;vertical-align: middle;">
-                        Configuración global
+                        <span data-i18n="Configuración global"></span>
                     </legend>
-                    <label for="global-config-language">Idioma</label>
+                    <label for="global-config-language" data-i18n="Idioma"></label>
                     <select id="global-config-language" name="language" style="width:100%;">
                         <option value="es">Español</option>
                         <option value="en">English</option>
                         <option value="ca">Català</option>
                     </select>
-                    <label for="global-config-temperature">Temperatura (<span
+                    <label for="global-config-temperature"><span data-i18n="Temperatura"></span> (<span
                             id="global-config-temperatura-span">0.8</span>)</label>
                     <input oninput="document.getElementById('global-config-temperatura-span').innerText = this.value"
                         type="range" min="0" max="1" step="0.01" value="0.8" id="global-config-temperature"
                         name="temperature" required style="width:100%;">
-                    <span class="pure-form-message-inline">Configuración por defecto por los nuevos atajos</span>
-                    <label for="global-config-keep-alive">Keep Alive (<span id="global-config-keep-alive-span">5</span>
-                        minutos)</label>
+                    <span class="pure-form-message-inline"
+                        data-i18n="Configuración por defecto por los nuevos atajos"></span>
+                    <label for="global-config-keep-alive"><span data-i18n="Keep Alive"></span> (<span
+                            id="global-config-keep-alive-span">5</span>
+                        <span data-i18n="minutos">minutos</span>)</label>
                     <input oninput="document.getElementById('global-config-keep-alive-span').innerText = this.value"
                         type="number" min="1" max="1440" step="1" value="5" id="global-config-keep-alive"
                         name="keep-alive" required>
-                    <span class="pure-form-message-inline">Controla cuánto tiempo el modelo permanecerá cargado en la
-                        memoria después de la solicitud</span>
-                    <label for="global-config-host">Ollama API Host</label>
+                    <span class="pure-form-message-inline"
+                        data-i18n="Controla cuánto tiempo el modelo permanecerá cargado en la memoria después de la solicitud"></span>
+                    <label for="global-config-host" data-i18n="Ollama API Host"></label>
                     <input placeholder="http://127.0.0.1:11434" style="width:100%;" type="url" name="host"
                         id="global-config-host" value="http://127.0.0.1:11434">
-                    <span class="pure-form-message-inline">Por defecto http://127.0.0.1:11434</span>
+                    <span class="pure-form-message-inline"
+                        data-i18n="Alerta: Al modificar este parámetro, la aplicación será reiniciada. Si tiene Ollama instalado en local, puede dejarlo en blanco."></span>
 
                 </fieldset>
             </form>

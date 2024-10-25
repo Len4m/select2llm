@@ -356,6 +356,7 @@ div.atajo-atajo>span.key {
 
 #global-config-box {
     text-align: left;
+    margin: 15px 15px 15px 15px;
 }
 
 #global-config-form legend {
@@ -374,7 +375,7 @@ div.atajo-atajo>span.key {
     padding: 15px;
     background-color: #ff4444;
     color: white;
-    margin-bottom:15px;
+    margin-bottom: 15px;
 }
 
 .ollama-alert span {
@@ -385,4 +386,8 @@ div.atajo-atajo>span.key {
 .ollama-alert svg {
     float: left;
     margin-right: 15px;
+}
+
+[data-i18n-lan] {
+    display: none;
 }

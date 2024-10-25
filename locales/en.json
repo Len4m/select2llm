@@ -1,0 +1,21 @@
+{
+  "Configuración (click)": "Settings (click)",
+  "Cancelar (doble click)": "Cancel (double click)",
+  "Salir": "Exit",
+  "Configuración global": "Global Settings",
+  "Idioma": "Language",
+  "Temperatura": "Temperature",
+  "Configuración por defecto por los nuevos atajos": "Default configuration for new shortcuts",
+  "Keep Alive": "Keep Alive",
+  "Controla cuánto tiempo el modelo permanecerá cargado en la memoria después de la solicitud": "Controls how long the model will stay loaded in memory after the request",
+  "Ollama API Host": "Ollama API Host",
+  "Alerta: Al modificar este parámetro, la aplicación será reiniciada. Si tiene Ollama instalado en local, puede dejarlo en blanco.": "Warning: Changing this setting will restart the application. If you have Ollama installed locally, you can leave it blank.",
+  "minutos": "minutes",
+  "Cargando ...": "Loading ...",
+  "Configuración de atajos": "Shortcut Settings",
+  "Tecla (alfanumérica o +-.,¡'/*)": "Key (alphanumeric or +-.,¡'/*)",
+  "Modelo": "Model",
+  "Cancelar": "Cancel",
+  "Eliminar atajo": "Delete Shortcut",
+  "Listado de atajos": "Shortcut List"
+}

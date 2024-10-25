@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import { globals } from '../globals.js';
 
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

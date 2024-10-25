@@ -1,0 +1,21 @@
+{
+  "Configuración (click)": "Configuración (click)",
+  "Cancelar (doble click)": "Cancelar (doble click)",
+  "Salir": "Salir",
+  "Configuración global": "Configuración global",
+  "Idioma": "Idioma",
+  "Temperatura": "Temperatura",
+  "Configuración por defecto por los nuevos atajos": "Configuración por defecto por los nuevos atajos",
+  "Keep Alive": "Keep Alive",
+  "Controla cuánto tiempo el modelo permanecerá cargado en la memoria después de la solicitud": "Controla cuánto tiempo el modelo permanecerá cargado en la memoria después de la solicitud",
+  "Ollama API Host": "Ollama API Host",
+  "Alerta: Al modificar este parámetro, la aplicación será reiniciada. Si tiene Ollama instalado en local, puede dejarlo en blanco.": "Alerta: Al modificar este parámetro, la aplicación será reiniciada. Si tiene Ollama instalado en local, puede dejarlo en blanco.",
+  "minutos": "minutos",
+  "Cargando ...": "Cargando ...",
+  "Configuración de atajos": "Configuración de atajos",
+  "Tecla (alfanumérica o +-.,¡'/*)": "Tecla (alfanumérica o +-.,¡'/*)",
+  "Modelo": "Modelo",
+  "Cancelar": "Cancelar",
+  "Eliminar atajo": "Eliminar atajo",
+  "Listado de atajos": "Listado de atajos"
+}

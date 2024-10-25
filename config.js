@@ -31,6 +31,7 @@ ipcRenderer.on('load-config', (event, config) => {
     global_config = config;
     setConfigFormData(config);
     clearForm();
+    loadAllTranslations();
 });
 
 
@@ -137,6 +138,8 @@ function renderShortcuts() {
         list.appendChild(item);
     });
 }
+
+
 
 function clearForm() {
     document.getElementById('index').value = '';
@@ -263,6 +266,8 @@ document.getElementById('author-link').addEventListener('click', (event) => {
 });
 
 
+
+
 Array.from(document.getElementsByClassName('ollama-download-link')).forEach((element) => {
     element.addEventListener('click', (event) => {
         event.preventDefault();
@@ -322,11 +327,61 @@ function getFormData() {
         }
     });
     global_config = data;
+
+
     ipcRenderer.send('save-config', data);
+
+    ipcRenderer.send('change-language', data.language);
     clearForm();
+
 }
 // Agregar event listener al formulario para detectar cambios
 form.addEventListener("change", getFormData);
 
 clearForm();
 
+
+/* i18n */
+// Solicitar y cargar una traducción específica
+const langSelect = document.getElementById('global-config-language');
+
+
+function loadTranslation(key) {
+    ipcRenderer.send('get-translation', key);
+}
+
+function updateText(data) {
+    const { key, translation } = data;
+    const elements = document.querySelectorAll(`[data-i18n="${key}"]`); // Selecciona todos los elementos que coinciden con la clave
+    elements.forEach((element) => {
+        element.textContent = translation;
+    });
+}
+
+// Escuchar la respuesta de traducción y actualizar el DOM
+ipcRenderer.on('translation', (event, data) => {
+    updateText(data);
+});
+
+ipcRenderer.on('language-changed', (event, translations) => {
+    loadAllTranslations() 
+});
+
+function loadAllTranslations() {
+    const htmlElements = document.querySelectorAll('[data-i18n-lan]');
+    htmlElements.forEach((element) => {
+        if (element.getAttribute('data-i18n-lan') == global_config.language) {
+            element.style.display = 'block';
+        } else {
+            element.style.display = '';
+        }
+    });
+
+    const elements = document.querySelectorAll('[data-i18n]');
+    elements.forEach((element) => {
+        const key = element.getAttribute('data-i18n');
+        ipcRenderer.send('get-translation', key); // Solicitar traducción al proceso principal
+    });
+}
+
+    

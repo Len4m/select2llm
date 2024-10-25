@@ -7,6 +7,9 @@ import { registerShortcuts, saveShortcuts } from './controllers/shortcutsControl
 import { cancelOllama, checkApi } from './controllers/ollamaController.js';
 import { getWindowGeometry } from './controllers/keyboardController.js';
 import { globals } from './globals.js';
+import i18n from './i18n.js';
+
+
 
 // Obtener la ruta del directorio actual
 const __filename = fileURLToPath(import.meta.url);
@@ -71,9 +74,12 @@ async function stopInferencia() {
 }
 
 // Comunicación desde la ventana de configuración para guardar los atajos
-ipcMain.on('save-shortcuts', (event, shortcuts) => {
+ipcMain.on('save-shortcuts', async (event, shortcuts) => {
     saveShortcuts(shortcuts);
-    registerShortcuts(startInferencia, stopInferencia);
+    let ollamaIsOk = await checkApi();
+    if (ollamaIsOk) {
+        registerShortcuts(startInferencia, stopInferencia);
+    }
 });
 
 // Author link
@@ -88,7 +94,17 @@ ipcMain.on('cancelar-proceso', () => {
 });
 
 
+// Escucha los eventos de traducción del proceso de renderizado
+ipcMain.on('get-translation', (event, key) => {
+    const translation = i18n.t(key);
+    event.reply('translation', { key, translation });
+});
 
+// Cambiar el idioma desde el renderizado y recargar traducciones
+ipcMain.on('change-language', (event, language) => {
+    i18n.setLanguage(language);
+    configWindow.webContents.send('language-changed', i18n.translations); // Enviar todas las traducciones al renderizador
+});
 
 
 // Comunicación desde la ventana de configuración para guardar los atajos
@@ -97,19 +113,19 @@ ipcMain.on('save-config', (event, config) => globals.saveConfig(config));
 app.whenReady().then(async () => {
 
     const ollamaIsOk = await checkApi();
-    
+
     // Crear un icono de estado (tray)
     tray = new Tray(getIconPath(0));
 
     const contextMenu = Menu.buildFromTemplate([
         {
-            label: 'Configuración (click)',
+            label: i18n.t('Configuración (click)'),
             click: async () => {
                 hideShowConfig();
             }
         },
         {
-            label: 'Cancelar (doble click)',
+            label: i18n.t('Cancelar (doble click)'),
             click: () => {
                 cancelOllama();
             },
@@ -120,7 +136,7 @@ app.whenReady().then(async () => {
                 if (process.platform !== 'darwin') app.quit();
                 process.exit(0);
             },
-            label: 'Salir'
+            label: i18n.t('Salir')
         },
     ]);
     tray.setToolTip('Select2LLM');
@@ -128,8 +144,9 @@ app.whenReady().then(async () => {
 
 
     configWindow = await createConfigWindow(ollamaIsOk);
-    configWindow.hide();
-
+    if (ollamaIsOk) {
+        configWindow.hide();
+    }
     let clickCount = 0;
     tray.on('click', (event, bounds) => {
         clickCount++;
@@ -146,8 +163,9 @@ app.whenReady().then(async () => {
     });
 
     // Registrar atajos desde el archivo JSON
-    registerShortcuts(startInferencia, stopInferencia);
-
+    if (ollamaIsOk) {
+        registerShortcuts(startInferencia, stopInferencia);
+    }
     // Para asegurar que la aplicación siga funcionando en segundo plano
     app.on('activate', async () => {
         if (BrowserWindow.getAllWindows().length === 0) configWindow = await createConfigWindow();

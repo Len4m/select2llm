@@ -1,0 +1,21 @@
+{
+  "Configuración (click)": "Configuració (clic)",
+  "Cancelar (doble click)": "Cancel·lar (doble clic)",
+  "Salir": "Sortir",
+  "Configuración global": "Configuració global",
+  "Idioma": "Idioma",
+  "Temperatura": "Temperatura",
+  "Configuración por defecto por los nuevos atajos": "Configuració per defecte per als nous dreceres",
+  "Keep Alive": "Manté viu",
+  "Controla cuánto tiempo el modelo permanecerá cargado en la memoria después de la solicitud": "Controla quant de temps el model romandrà carregat en la memòria després de la sol·licitud",
+  "Ollama API Host": "Ollama API Host",
+  "Alerta: Al modificar este parámetro, la aplicación será reiniciada. Si tiene Ollama instalado en local, puede dejarlo en blanco.": "Avís: En modificar aquest paràmetre, l'aplicació es reiniciarà. Si tens Ollama instal·lat localment, pots deixar-ho en blanc.",
+  "minutos": "minuts",
+  "Cargando ...": "Carregant ...",
+  "Configuración de atajos": "Configuració de dreceres",
+  "Tecla (alfanumérica o +-.,¡'/*)": "Tecla (alfanumèrica o +-.,¡'/*)",
+  "Modelo": "Model",
+  "Cancelar": "Cancel·lar",
+  "Eliminar atajo": "Eliminar drecera",
+  "Listado de atajos": "Llistat de dreceres"
+}
