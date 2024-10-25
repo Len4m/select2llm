@@ -19,7 +19,6 @@
   "license": "GPL-3.0",
   "dependencies": {
     "clipboardy": "^4.0.0",
-    "fs": "^0.0.1-security",
     "ollama": "^0.5.9"
   },
   "devDependencies": {
@@ -27,14 +26,16 @@
     "electron-builder": "^25.0.5"
   },
   "build": {
-    "appId": "com.lenam.select2llm",
+    "appId": "com.lenam.Select2llm",
     "productName": "Select2LLM",
     "icon": "images/icon-transparent.png",
     "asar": false,
     "linux": {
       "category": "Utility",
       "icon": "images/icon-transparent.png",
-      "target": ["AppImage"]
+      "target": [
+        "AppImage"
+      ]
     },
     "win": {
       "target": "nsis"

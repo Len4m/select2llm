@@ -3,6 +3,7 @@ import { listOllama } from '../controllers/ollamaController.js';
 import { loadShortcuts } from '../controllers/shortcutsController.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { globals } from '../globals.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,10 +15,10 @@ export async function createConfigWindow() {
     try {
         configWindow = await new Promise((resolve, reject) => {
             const windowOptions = {
-                width: 500,
-                height: 350,
-                minWidth: 500,
-                minHeight: 350,
+                width: 660,
+                height: 475,
+                minWidth: 660,
+                minHeight: 475,
                 show: false,
                 autoHideMenuBar: true,
                 menu: null,
@@ -44,6 +45,12 @@ export async function createConfigWindow() {
             });
 
             win.webContents.on('did-finish-load', async () => {
+                win.webContents.send('load-config', {
+                    language: globals.language,
+                    temperature: globals.temperature,
+                    'keep-alive': globals['keep-alive'],
+                    host: globals.host === '' ? 'http://127.0.0.1:11434' : globals.host
+                });
                 win.webContents.send('load-shortcuts', loadShortcuts());
                 win.webContents.send('load-models', await listOllama());
             });

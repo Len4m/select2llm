@@ -266,7 +266,7 @@ div.atajo-atajo>span.key {
 }
 
 .pure-button-secondary {
-    display: none;
+
     color: white;
     background-color: #2c9bb488;
 }
@@ -290,4 +290,78 @@ div.atajo-atajo>span.key {
     width: 250px;
     height: 25px;
     margin-bottom: 10px;
+}
+
+#global-settings-btn {
+    height: 20px;
+    text-decoration: none;
+    color: #000;
+    float: right;
+    background-image: url(images/settings-icon.png);
+    background-size: contain;
+    background-position: left;
+    background-repeat: no-repeat;
+    padding-left: 25px;
+    margin-top: 20px;
+}
+
+#cancel-btn {
+
+    border-radius: 4px;
+    margin-top: 15px;
+    display: none;
+    text-align: right;
+}
+
+
+
+#global-config-form {
+
+    min-width: 430px;
+    margin-top: 20px;
+    position: relative;
+
+}
+
+#global-config-form select {
+    width: 200px;
+}
+
+#global-config-form label {
+    width: 5em;
+}
+
+#global-config-form>fieldset>legend {
+    font-size: 18px;
+    padding-bottom: 15px;
+}
+
+.global-config-close {
+    width: 20px;
+    height: auto;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+.global-config-close:hover {
+    opacity: 1;
+}
+
+#global-config-temperature {
+    width: 200px;
+}
+
+#global-config-box {
+    text-align:left;
+}
+#global-config-form legend {
+    padding-bottom: 0 !important;
+}
+#global-config-box label {
+    width:100%;
+    margin:15px 0px 5px 0px;
+    font-weight: 700;
 }

@@ -56,13 +56,14 @@
             <br>
             <label for="temperature">Temperatura (<span id="temperatura-span">0.8</span>)</label>
             <div id="temperature-div">
-                <input oninput="document.getElementById('temperatura-span').innerText = this.value" type="range" min="0" max="1" step="0.01" value="0.8" id="temperature" name="temperature" required>
+                <input oninput="document.getElementById('temperatura-span').innerText = this.value" type="range" min="0"
+                    max="1" step="0.01" value="0.8" id="temperature" name="temperature" required>
             </div>
             <textarea id="prompt" name="prompt"></textarea>
             <button id="add-btn" type="submit" class="pure-button pure-button-primary"
                 style="border-radius: 4px;margin-top:15px;">Agregar</button>
-                <button id="cancel-btn" type="button" class="pure-button-secondary pure-button"
-                    style="border-radius: 4px;margin-top:15px;">Cancelar</button>
+            <button id="cancel-btn" type="button" class="pure-button-secondary pure-button">Cancelar</button>
+            <a href="#" id="global-settings-btn">Configuración global</a>
         </fieldset>
     </form>
 
@@ -70,9 +71,50 @@
         <div>
             <p>Seguro que quiere eliminar el atajo?</p>
             <button class="button-error pure-button" id="accept-confirm" data-index="0">Eliminar atajo</button>
-            <button class="button-success pure-button" id="cancer-confirm">Cancelar</button>
+            <button class="pure-button-secondary pure-button"
+                onclick="document.getElementById('del-confirm').style.display = '';">Cancelar</button>
         </div>
     </div>
+
+    <div id="global-config" class="confirm">
+        <div id="global-config-box">
+
+            <form id="global-config-form" class="pure-form pure-form-stacked">
+                <img src="images/close-icon.png" class="global-config-close">
+                <fieldset>
+                    <legend>
+                        <img src="images/settings-icon.png" style="max-width:25px;vertical-align: middle;">
+                        Configuración global
+                    </legend>
+                    <label for="global-config-language">Idioma</label>
+                    <select id="global-config-language" name="language" style="width:100%;">
+                        <option value="es">Español</option>
+                        <option value="en">English</option>
+                        <option value="ca">Català</option>
+                    </select>
+                    <label for="global-config-temperature">Temperatura (<span
+                            id="global-config-temperatura-span">0.8</span>)</label>
+                    <input oninput="document.getElementById('global-config-temperatura-span').innerText = this.value"
+                        type="range" min="0" max="1" step="0.01" value="0.8" id="global-config-temperature"
+                        name="temperature" required style="width:100%;">
+                    <span class="pure-form-message-inline">Configuración por defecto por los nuevos atajos</span>
+                    <label for="global-config-keep-alive">Keep Alive (<span id="global-config-keep-alive-span">5</span>
+                        minutos)</label>
+                    <input oninput="document.getElementById('global-config-keep-alive-span').innerText = this.value"
+                        type="number" min="1" max="1440" step="1" value="5" id="global-config-keep-alive"
+                        name="keep-alive" required>
+                    <span class="pure-form-message-inline">Controla cuánto tiempo el modelo permanecerá cargado en la
+                        memoria después de la solicitud</span>
+                    <label for="global-config-host">API Host</label>
+                    <input placeholder="http://127.0.0.1:11434" style="width:100%;" type="url" name="host"
+                        id="global-config-host" value="http://127.0.0.1:11434">
+                    <span class="pure-form-message-inline">Por defecto http://127.0.0.1:11434</span>
+
+                </fieldset>
+            </form>
+        </div>
+    </div>
+
     <template id="prompts-items" style="display:none;">
         <li class="atajo-li">
             <div class="atajo-atajo"></div>
@@ -80,6 +122,8 @@
             <p></p>
         </li>
     </template>
+
+    
     <script src="config.js"></script>
 </body>
 
