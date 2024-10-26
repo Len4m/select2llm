@@ -50,8 +50,8 @@ Puedes instalar **Select2LLM** de dos maneras: descargando las compilaciones dis
 
 Para una instalación más sencilla, puedes descargar los archivos de compilación ya generados.
 
-- **[Descargar versión de Windows](#)** (solo para pruebas)
-- **[Descargar versión de Linux](#)** (solo para pruebas)
+- **[Descargar versión de Windows](https://drive.proton.me/urls/RREPSZKDPC#4wxFbVkzBCZY)** (solo para pruebas)
+- **[Descargar versión de Linux](https://drive.proton.me/urls/6YGP612944#2JojPNlXBfW3)** (solo para pruebas)
 
 > **Advertencia**: Las versiones proporcionadas son únicamente para propósitos de prueba. No nos hacemos responsables de cualquier problema que pueda ocurrir durante su uso. Actualmente, la versión de Windows no funciona muy bien y la versión de Linux está limitada a sistemas X-Windows.
 
@@ -169,8 +169,8 @@ La idea detrás de Select2LLM surgió por la frustración de tener que buscar pl
 
 Las compilaciones de **Select2LLM** para **Windows** y **Linux** están disponibles únicamente con fines de pruebas. Actualmente, la versión de Windows no funciona muy bien y la versión de Linux está limitada a sistemas X-Windows.
 
-- [Descargar versión de Windows](#) (solo para pruebas)
-- [Descargar versión de Linux](#) (solo para pruebas)
+- [Descargar versión de Windows](https://drive.proton.me/urls/RREPSZKDPC#4wxFbVkzBCZY) (solo para pruebas)
+- [Descargar versión de Linux](https://drive.proton.me/urls/6YGP612944#2JojPNlXBfW3) (solo para pruebas)
 
 > **Advertencia**: Las versiones proporcionadas son únicamente para propósitos de prueba. No nos hacemos responsables de cualquier problema que pueda ocurrir durante su uso.
 
