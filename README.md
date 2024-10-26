@@ -4,6 +4,7 @@
 
 ![Imagen de la Interfaz](image.png)
 
+
 ## Características
 
 - **Acceso rápido y configurable a modelos LLM**: Selecciona texto en cualquier aplicación y envíalo a un modelo de tu elección con una simple combinación de teclas.
