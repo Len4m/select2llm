@@ -53,7 +53,7 @@ export function sendTextWindows(text) {
     let escapeText = escapeForSendKeys(text).toString('binary');
     return new Promise((resolve, reject) => {
         if (!escapeText.length|| !text.length) resolve();
-        exec(`powershell.exe -ExecutionPolicy Bypass -File ${powerShellSendText} -hWnd ${hWnd} -text "${escapeText}"`, (error, stdout, stderr) => {
+        exec(`powershell.exe -ExecutionPolicy Bypass -File ${powerShellSendText} -hWnd ${hWnd} -Texto "${escapeText}"`, (error, stdout, stderr) => {
             if (error) {
                 console.error(`Error al ejecutar el script ${powerShellSendText}:\n${error}`);
                 reject(error);
