@@ -21,7 +21,6 @@
   "Seguro que quiere eliminar el atajo?": "Are you sure you want to delete the shortcut?",
   "Agregar": "Add",
   "Editar": "Edit",
-  "Settings (click)": "[Settings (click)]",
-  "Cancel (double click)": "[Cancel (double click)]",
-  "Exit": "[Exit]"
+  "Procesando su petición, por favor espere...": "Processing your request, please wait...",
+  "Atención: No utilice la aplicación mientras se está procesando su petición.": "Attention: Do not use the application while your request is being processed."
 }

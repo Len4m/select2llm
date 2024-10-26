@@ -74,17 +74,37 @@
 </head>
 
 <body>
-    <div id="mensaje">Procesando su petición, por favor espere...<br>
-        <small>Atención: No utilice la aplicación mientras se está procesando su petición.</small>
+    <div id="mensaje"><span data-i18n="Procesando su petición, por favor espere..."></span><br>
+        <small data-i18n="Atención: No utilice la aplicación mientras se está procesando su petición."></small>
     </div>
-    <button id="boton-cancelar" onclick="cancelarProceso()">Cancelar</button>
+    <button id="boton-cancelar" onclick="cancelarProceso()" data-i18n="Cancelar"></button>
 
     <script>
         const { ipcRenderer } = require('electron');
 
+        function updateText(data) {
+            const { key, translation } = data;
+            const elements = document.querySelectorAll(`[data-i18n="${key}"]`); // Select all elements that match the key
+            elements.forEach((element) => {
+                element.textContent = translation;
+            });
+        }
+
         function cancelarProceso() {
             ipcRenderer.send('cancelar-proceso');
         }
+
+        // Listen for translation response and update the DOM
+        ipcRenderer.on('translation', (event, data) => {
+            updateText(data);
+        });
+
+        const elements = document.querySelectorAll('[data-i18n]');
+        elements.forEach((element) => {
+            const key = element.getAttribute('data-i18n');
+            ipcRenderer.send('get-translation', key); // Request translation from the main process
+        });
+
     </script>
 </body>
 
