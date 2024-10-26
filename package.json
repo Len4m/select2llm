@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "select2llm",
-  "homepage": "https://len4m.github.io/",
+  "homepage": "https://github.com/Len4m/select2llm",
   "version": "1.0.0",
   "description": "Select text to LLM",
   "author": {
