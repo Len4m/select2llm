@@ -2,13 +2,18 @@
 import fs from 'fs';
 import path from 'path';
 import { globals } from './globals.js'; // Importar el módulo globals
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 class I18n {
     constructor() {
         // Cargar el idioma predeterminado desde globals.language, o 'es' si no está definido
         this.language = globals.language || 'es';
         this.translations = {};
-        this.localesDir = path.join('.', 'locales');
+        this.localesDir = path.join(__dirname, 'locales');
         this.loadTranslations();
     }
 
