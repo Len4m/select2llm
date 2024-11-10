@@ -10,6 +10,7 @@ h1 {
     display: flex;
     -webkit-text-stroke: 1px black;
     font-weight: bold;
+    margin: 0;
 }
 
 .logo {
@@ -372,4 +373,14 @@ div.atajo-atajo > span.key {
 
 [data-i18n-lan] {
     display: none;
+}
+
+.overlay-div {
+    margin: 8px 0 10px 0;
+}
+
+.overlay-div > label,
+.overlay-div > input {
+    cursor: pointer;
+
 }

@@ -150,9 +150,11 @@ function clearForm() {
     document.getElementById('prompt').value = '';
     document.getElementById('temperature').value = global_config.temperature;
     document.getElementById('temperatura-span').innerText = global_config.temperature;
+    document.getElementById('overlay').checked = true;
     document.getElementById('add-btn').style.display = "inline-block";
     document.getElementById('edit-btn').style.display = "none";
     document.getElementById('cancel-btn').style.display = '';
+    
 }
 
 // Edit an existing shortcut and populate the form with its details
@@ -167,6 +169,7 @@ function edit_shortcut(index) {
     document.getElementById('model').value = shortcut.model;
     document.getElementById('temperature').value = shortcut.temperature;
     document.getElementById('temperatura-span').innerText = shortcut.temperature;
+    document.getElementById('overlay').checked = shortcut.overlay;
     document.getElementById('edit-btn').style.display = "inline-block";
     document.getElementById('add-btn').style.display = "none";
     document.getElementById('cancel-btn').style.display = 'inline-block';
@@ -195,7 +198,8 @@ document.getElementById('shortcut-form').addEventListener('submit', (event) => {
     const prompt = document.getElementById('prompt').value.trim() || '%s';
     const model = document.getElementById('model').value;
     const temperature = document.getElementById('temperature').value;
-
+    const overlay = document.getElementById('overlay').checked;
+   
     if (index === "") {
         // Validate if the shortcut already exists
         if (shortcuts.some(
@@ -217,7 +221,8 @@ document.getElementById('shortcut-form').addEventListener('submit', (event) => {
             key: key,
             prompt: prompt,
             model: model,
-            temperature: temperature
+            temperature: temperature,
+            overlay: overlay
         });
     } else {
         // Validate if the shortcut already exists (but ignore the current index)
@@ -241,7 +246,8 @@ document.getElementById('shortcut-form').addEventListener('submit', (event) => {
             key: key,
             prompt: prompt,
             model: model,
-            temperature: temperature
+            temperature: temperature,
+            overlay: overlay
         };
     }
     saveAndRender();

@@ -77,7 +77,7 @@ function callShortcut(combination, startCallBack, shortcut, stopCallBack) {
             
             // Validar si la inferencia no está activa y hay texto seleccionado
             if (!globals.inferencia && selectData) {
-                if (startCallBack) await startCallBack();
+                if (startCallBack) await startCallBack(shortcut.overlay);
                 
                 // Formar el mensaje a partir del prompt del atajo
                 const message = shortcut.prompt.includes('%s')
@@ -89,7 +89,7 @@ function callShortcut(combination, startCallBack, shortcut, stopCallBack) {
                 // Llamar a Ollama para procesar el mensaje
                 await callOllama(message, shortcut.model, shortcut.temperature);
                 
-                if (stopCallBack) await stopCallBack();
+                if (stopCallBack) await stopCallBack(shortcut.overlay);
             }
         } catch (error) {
             console.error('Error al ejecutar el atajo:', error);

@@ -12,7 +12,7 @@ import i18n from './i18n.js';
 // Only one instance
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
-  app.quit()
+    app.quit()
 }
 
 // Get the path of the current directory
@@ -60,23 +60,27 @@ function getIconPath(index) {
 }
 
 // Start inference process
-async function startInference() {
+async function startInference(overlay = true) {
     if (animationInterval) clearInterval(animationInterval);
     animationInterval = setInterval(() => {
         iconIndex = ((iconIndex + 1) % 20);
         tray.setImage(getIconPath(iconIndex));
     }, 150);
     // Create hidden window
-    let geo = await getWindowGeometry();
-    createTransparentWindow(geo);
+    if (overlay) {
+        let geo = await getWindowGeometry();
+        createTransparentWindow(geo);
+    }
     globals.inferencia = true;
 }
 
 // Stop inference process
-async function stopInference() {
+async function stopInference(overlay = true) {
     if (animationInterval) clearInterval(animationInterval);
     tray.setImage(getIconPath(0));
-    removeTransparentWindow();
+    if (overlay) {
+        removeTransparentWindow();
+    }
     globals.inferencia = false;
 }
 
