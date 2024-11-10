@@ -11,7 +11,7 @@
   },
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "export ELECTRON_OZONE_PLATFORM_HINT=auto && electron .",
     "build": "electron-builder",
     "rebuild": "npm rebuild --runtime=electron --target=32.1.2 --disturl=https://atom.io/download/atom-shell --abi=20.17.0",
     "test": "echo \"Error: no test specified\" && exit 1"
