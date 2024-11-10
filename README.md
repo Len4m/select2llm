@@ -105,7 +105,8 @@ El formato de este archivo es el siguiente:
     "key": "t",
     "prompt": "Traduce el siguiente texto al inglés. Devuelve únicamente la traducción en inglés sin incluir ningún comentario, explicación ni texto adicional:",
     "model": "llama3.2:latest",
-    "temperature": 0.7
+    "temperature": 0.7,
+    "overlay": true
   },
   {
     "ctrl": true,
@@ -114,7 +115,8 @@ El formato de este archivo es el siguiente:
     "key": "p",
     "prompt": "Mejora esta programación para que sea más corta y más eficiente, muéstrame solo la programación sin incluir ningún comentario, explicación ni texto adicional:",
     "model": "mistral:instruct",
-    "temperature": 0.6
+    "temperature": 0.6,
+    "overlay": true
   },
   {
     "ctrl": true,
@@ -123,7 +125,8 @@ El formato de este archivo es el siguiente:
     "key": "g",
     "prompt": "%s",
     "model": "gemma2:latest",
-    "temperature": 0.28
+    "temperature": 0.28,
+    "overlay": false
   }
 ]
 ```
@@ -133,6 +136,7 @@ El formato de este archivo es el siguiente:
 - **prompt**: El mensaje que se enviará al modelo LLM, con el texto seleccionado añadido al final.
 - **model**: El modelo LLM cargado en Ollama que se utilizará para procesar el texto.
 - **temperature**: Establece la "creatividad" del modelo LLM para esta configuración específica, con valores más altos generando respuestas más variadas.
+- **overlay**: Establece si se mostrará una ventana superpuesta en la aplicación donde el texto es escrito por select2llm y generado por Ollama.
 
 ### Configuración Global
 
@@ -149,7 +153,7 @@ El formato de este archivo es el siguiente:
 }
 ```
 
-- **language**: Define el idioma preferido para la interfaz de usuario.
+- **language**: Define el idioma preferido para la interfaz de usuario (actualmente inglés, español y catalán).
 - **temperature**: Valor por defecto de creatividad del modelo para todas las consultas.
 - **keep-alive**: Tiempo en minutos que el modelo permanecerá en memoria.
 - **host**: URL del servidor Ollama que se utilizará para procesar las peticiones.
