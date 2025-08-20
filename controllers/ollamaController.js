@@ -34,6 +34,11 @@ export async function listOllama() {
     let list = [];
     try {
         list = await ollama.list();
+        // Ordenar la lista alfabéticamente por el campo 'name'
+        if (list && list.models && Array.isArray(list.models)) {
+            list.models.sort((a, b) => a.name.localeCompare(b.name));
+        }
+                
     } catch (error) {
         console.error('Error al listar modelos:', error);
     }
