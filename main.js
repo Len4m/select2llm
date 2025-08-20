@@ -245,6 +245,16 @@ ipcMain.on('save-config', (event, config) => {
     }
 });
 
+// Restart application from the configuration window
+ipcMain.on('restart-application', (event) => {
+    try {
+        logger.info('Application restart requested from UI');
+        configService.restartApplication();
+    } catch (error) {
+        logger.error('Error restarting application', { error: error.message });
+    }
+});
+
 // App initialization
 app.whenReady().then(async () => {
     try {

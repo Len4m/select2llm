@@ -16,9 +16,13 @@ export async function createConfigWindow(ollamaIsOk) {
         logger.debug('Creating config window', { ollamaAvailable: ollamaIsOk });
         
         configWindow = await new Promise((resolve, reject) => {
+            // Obtener configuración de ventana guardada
+            const windowSettings = configService.getWindowSettings();
+            logger.debug('Loading window settings', { windowSettings });
+            
             const windowOptions = {
-                width: WINDOW_CONFIG.CONFIG.WIDTH,
-                height: WINDOW_CONFIG.CONFIG.HEIGHT,
+                width: windowSettings.width || WINDOW_CONFIG.CONFIG.WIDTH,
+                height: windowSettings.height || WINDOW_CONFIG.CONFIG.HEIGHT,
                 minWidth: WINDOW_CONFIG.CONFIG.MIN_WIDTH,
                 minHeight: WINDOW_CONFIG.CONFIG.MIN_HEIGHT,
                 show: false,
@@ -30,6 +34,12 @@ export async function createConfigWindow(ollamaIsOk) {
                     contextIsolation: false,
                 },
             };
+
+            // Aplicar posición guardada si existe
+            if (windowSettings.x !== undefined && windowSettings.y !== undefined) {
+                windowOptions.x = windowSettings.x;
+                windowOptions.y = windowSettings.y;
+            }
 
             const win = new BrowserWindow(windowOptions);
 
@@ -77,7 +87,34 @@ export async function createConfigWindow(ollamaIsOk) {
                 }
             });
 
+            // Guardar configuración de ventana cuando se mueva o redimensione
+            let saveTimeout;
+            const saveWindowState = () => {
+                // Debounce para evitar guardar demasiado frecuentemente
+                if (saveTimeout) clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    try {
+                        const bounds = win.getBounds();
+                        configService.updateWindowBounds(bounds);
+                    } catch (error) {
+                        logger.error('Error saving window state', { error: error.message });
+                    }
+                }, 500); // Esperar 500ms después del último evento
+            };
+
+            // Escuchar eventos de redimensionado y movimiento
+            win.on('resize', saveWindowState);
+            win.on('move', saveWindowState);
+
             win.on('close', (event) => {
+                // Guardar estado final antes de cerrar
+                try {
+                    const bounds = win.getBounds();
+                    configService.updateWindowBounds(bounds);
+                } catch (error) {
+                    logger.error('Error saving final window state', { error: error.message });
+                }
+                
                 event.preventDefault(); // Evita que la ventana se cierre por completo
                 win.hide(); // Oculta la ventana en lugar de destruirla
             });

@@ -40,7 +40,9 @@ export class ConfigService {
             windowSettings: {
                 width: 660,
                 height: 475,
-                remember: false
+                x: undefined,
+                y: undefined,
+                remember: true
             }
         };
     }
@@ -76,11 +78,31 @@ export class ConfigService {
      * Normaliza los tipos de datos en la configuración
      */
     normalizeConfig(config) {
-        return {
+        const normalized = {
             ...config,
             temperature: typeof config.temperature === 'string' ? parseFloat(config.temperature) : Number(config.temperature),
             'keep-alive': typeof config['keep-alive'] === 'string' ? parseInt(config['keep-alive']) : Number(config['keep-alive'])
         };
+
+        // Si el host está vacío o no definido, usar el valor por defecto
+        if (!normalized.host || normalized.host.trim() === '') {
+            normalized.host = 'http://127.0.0.1:11434';
+        } else {
+            // Limpiar hosts malformados (como http:///127.0.0.1:11434)
+            normalized.host = normalized.host.replace(/^(https?:)\/\/+/, '$1//');
+        }
+
+        // Asegurar que windowSettings tiene la estructura completa
+        if (!normalized.windowSettings) {
+            normalized.windowSettings = this.defaultConfig.windowSettings;
+        } else {
+            normalized.windowSettings = {
+                ...this.defaultConfig.windowSettings,
+                ...normalized.windowSettings
+            };
+        }
+
+        return normalized;
     }
 
     /**
@@ -259,17 +281,12 @@ export class ConfigService {
             
             logger.configSaved(this.currentConfig);
 
-            // Si cambió el host, reiniciar la aplicación
+            // Si cambió el host, registrar el cambio (ya no reiniciamos automáticamente)
             if (previousHost !== this.currentConfig.host) {
-                logger.info('Host changed, restarting application', { 
+                logger.info('Host changed, restart required', { 
                     oldHost: previousHost, 
                     newHost: this.currentConfig.host 
                 });
-                
-                setTimeout(() => {
-                    app.relaunch();
-                    app.exit(0);
-                }, 1500);
             }
 
             return true;
@@ -348,6 +365,76 @@ export class ConfigService {
         } catch (error) {
             logger.error('Failed to reset configuration', { error: error.message });
             throw error;
+        }
+    }
+
+    /**
+     * Obtiene la configuración de ventana
+     */
+    getWindowSettings() {
+        return { ...this.currentConfig.windowSettings };
+    }
+
+    /**
+     * Guarda la configuración de ventana
+     */
+    saveWindowSettings(windowSettings) {
+        try {
+            const newConfig = {
+                ...this.currentConfig,
+                windowSettings: {
+                    ...this.currentConfig.windowSettings,
+                    ...windowSettings
+                }
+            };
+
+            this.currentConfig = newConfig;
+            fs.writeFileSync(this.configFilePath, JSON.stringify(this.currentConfig, null, 2));
+            
+            logger.debug('Window settings saved', { windowSettings });
+            return true;
+        } catch (error) {
+            logger.error('Failed to save window settings', { error: error.message });
+            return false;
+        }
+    }
+
+    /**
+     * Actualiza solo las dimensiones de la ventana (sin posición)
+     */
+    updateWindowSize(width, height) {
+        return this.saveWindowSettings({ width, height });
+    }
+
+    /**
+     * Actualiza solo la posición de la ventana
+     */
+    updateWindowPosition(x, y) {
+        return this.saveWindowSettings({ x, y });
+    }
+
+    /**
+     * Actualiza tanto dimensiones como posición
+     */
+    updateWindowBounds(bounds) {
+        const { width, height, x, y } = bounds;
+        return this.saveWindowSettings({ width, height, x, y });
+    }
+
+    /**
+     * Reinicia la aplicación
+     */
+    restartApplication() {
+        try {
+            logger.info('Application restart requested by user');
+            setTimeout(() => {
+                app.relaunch();
+                app.exit(0);
+            }, 500);
+            return true;
+        } catch (error) {
+            logger.error('Failed to restart application', { error: error.message });
+            return false;
         }
     }
 

@@ -3,7 +3,7 @@
  * Proporciona manejo consistente de errores, recuperación y notificaciones
  */
 
-import { dialog, app } from 'electron';
+import { dialog, app, shell } from 'electron';
 import logger from './logger.js';
 import { ERROR_CODES } from '../constants/index.js';
 
@@ -150,7 +150,6 @@ export class ErrorService {
      * Abre el navegador para reportar un bug
      */
     openBugReport() {
-        const { shell } = require('electron');
         shell.openExternal('https://github.com/Len4m/select2llm/issues/new');
     }
 

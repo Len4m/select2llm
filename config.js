@@ -58,6 +58,10 @@ function setConfigFormData(data) {
         }
     }
     document.getElementById('global-config-temperatura-span').innerText = data.temperature;
+    
+    // Almacenar el valor original del host y verificar el estado inicial
+    originalHostValue = data.host || "http://127.0.0.1:11434";
+    checkHostChange();
 }
 
 // Encode a string to safely display it as HTML, preventing injection attacks
@@ -325,30 +329,128 @@ globalConfigDiv.addEventListener('click', function (event) {
 
 // Global config form:
 const form = document.getElementById("global-config-form");
+const hostInput = document.getElementById("global-config-host");
+const restartButton = document.getElementById("restart-button");
+const hostWarning = document.getElementById("host-change-warning");
+
+// Variable para almacenar el valor original del host
+let originalHostValue = "";
+
+// Función para verificar si el host ha cambiado
+function checkHostChange() {
+    const currentValue = hostInput.value.trim() || "http://127.0.0.1:11434";
+    const originalValue = originalHostValue || "http://127.0.0.1:11434";
+    const hasChanged = currentValue !== originalValue;
+    
+    // Actualizar el estado del botón y la advertencia
+    restartButton.disabled = !hasChanged;
+    hostWarning.style.display = hasChanged ? 'block' : 'none';
+    
+    // Cambiar el estilo del botón dependiendo del estado
+    if (hasChanged) {
+        restartButton.style.backgroundColor = '#ff6b35';
+        restartButton.style.cursor = 'pointer';
+    } else {
+        restartButton.style.backgroundColor = '#ccc';
+        restartButton.style.cursor = 'not-allowed';
+    }
+}
+
+// Función para guardar solo el host
+function saveHostConfiguration() {
+    const hostValue = hostInput.value.trim() || "http://127.0.0.1:11434";
+    const data = { ...global_config, host: hostValue };
+    
+    ipcRenderer.send('save-config', data);
+    
+    // Actualizar la configuración global y el valor original
+    global_config = data;
+    originalHostValue = hostValue;
+    checkHostChange();
+}
+
+// Función para reiniciar la aplicación
+function restartApplication() {
+    if (!restartButton.disabled) {
+        // Guardar la configuración del host antes de reiniciar
+        saveHostConfiguration();
+        
+        // Dar un pequeño delay para que se guarde la configuración
+        setTimeout(() => {
+            ipcRenderer.send('restart-application');
+        }, 100);
+    }
+}
 
 // Function to get the form data and generate a configuration object
-function getFormData() {
+function getFormData(excludeHost = false) {
     const formData = new FormData(form);
     const data = {};
     formData.forEach((value, key) => {
+        // Excluir el host si se especifica
+        if (excludeHost && key === "host") {
+            return;
+        }
+        
         // Convert "temperature" and "keep-alive" to numbers
         if (key === "temperature") {
             data[key] = parseFloat(value);
         } else if (key === "keep-alive") {
             data[key] = parseInt(value, 10);
+        } else if (key === "host") {
+            // Si el host está vacío, usar el placeholder por defecto
+            data[key] = value.trim() || "http://127.0.0.1:11434";
         } else {
             data[key] = value;
         }
     });
+    
+    // Si excluimos el host, mantener el valor actual
+    if (excludeHost && global_config) {
+        data.host = global_config.host;
+    }
+    
     global_config = data;
 
     ipcRenderer.send('save-config', data);
     ipcRenderer.send('change-language', data.language);
+    
+    // Solo actualizar el valor original del host si no se excluye
+    if (!excludeHost) {
+        originalHostValue = data.host || "http://127.0.0.1:11434";
+        checkHostChange();
+    }
+    
     clearForm();
 }
 
 // Add event listener to the configuration form to detect changes and save configuration
-form.addEventListener("change", getFormData);
+form.addEventListener("change", (event) => {
+    // Si el cambio proviene del campo host, no guardarlo automáticamente
+    if (event.target && event.target.name === "host") {
+        getFormData(true); // Excluir el host del guardado automático
+    } else {
+        getFormData(); // Guardado normal para otros campos
+    }
+});
+
+// Añadir event listeners para detectar cambios en el host
+hostInput.addEventListener("input", checkHostChange);
+hostInput.addEventListener("blur", checkHostChange);
+
+// Añadir event listener al botón de reinicio
+restartButton.addEventListener("click", restartApplication);
+
+// Guardar el host cuando se cierra la ventana de configuración (si ha cambiado)
+window.addEventListener('beforeunload', () => {
+    const currentValue = hostInput.value.trim() || "http://127.0.0.1:11434";
+    const originalValue = originalHostValue || "http://127.0.0.1:11434";
+    
+    // Solo guardar si realmente ha cambiado
+    if (currentValue !== originalValue) {
+        saveHostConfiguration();
+    }
+});
 
 clearForm();
 
