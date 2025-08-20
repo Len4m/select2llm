@@ -1,23 +1,18 @@
 import { exec, execSync } from 'child_process';
 
 let wid;
+const sessionType = (process.env.XDG_SESSION_TYPE || '').toLowerCase(); // 'wayland' o 'x11'
 
-
-// Función para escapar caracteres especiales para bash y xdotool
-function escapeForBash(a) {
-    var ret = [];
-    a.forEach(function (s) {
+// Función para escapar caracteres especiales para bash (se usa con xdotool)
+function escapeForBash(args) {
+    return args.map(s => {
         if (/[^A-Za-z0-9_\/:=-]/.test(s)) {
             s = "'" + s.replace(/'/g, "'\\''") + "'";
-            s = s.replace(/^(?:'')+/g, '') // unduplicate single-quote at the beginning
-                .replace(/\\'''/g, "\\'"); // remove non-escaped single-quote if there are enclosed between 2 escaped
+            s = s.replace(/^(?:'')+/g, '').replace(/\\'''/g, "\\'");
         }
-        ret.push(s);
-    });
-
-    return ret.join(' ');
+        return s;
+    }).join(' ');
 }
-
 
 export function sendTextLinux(text) {
     return new Promise((resolve, reject) => {
@@ -25,30 +20,47 @@ export function sendTextLinux(text) {
 
         function typeLines(lines) {
             if (lines.length === 0) {
-                resolve(); // Resolución cuando todas las líneas han sido procesadas
+                resolve(); // Se procesaron todas las líneas
                 return;
             }
             const line = lines.shift();
-            let cmd;
+            let cmd = '';
 
-            if (line.length > 0) {
-                cmd = escapeForBash(['xdotool', 'type', '--clearmodifiers', '--window', wid, '--', line]);
-            }
-
-            if (lines.length > 0) {
-                if (line.length > 0)
-                    cmd += ` && xdotool key --clearmodifiers --window '${wid}' Return`;
-                else
-                    cmd = `xdotool key --clearmodifiers --window '${wid}' Return`;
+            if (sessionType === 'x11') {
+                // En X11: usamos xdotool y el ID de la ventana (wid)
+                if (line.length > 0) {
+                    cmd = escapeForBash(['xdotool', 'type', '--clearmodifiers', '--window', wid, '--', line]);
+                }
+                if (lines.length > 0) {
+                    if (line.length > 0)
+                        cmd += ` && xdotool key --clearmodifiers --window '${wid}' Return`;
+                    else
+                        cmd = `xdotool key --clearmodifiers --window '${wid}' Return`;
+                }
+            } else if (sessionType === 'wayland') {
+                // En Wayland: usamos ydotool en lugar de wtype
+                if (line.length > 0) {
+                    // ydotool escribe el texto directamente con el comando "type"
+                    const safeLine = line.replace(/'/g, "'\\''");
+                    cmd = `ydotool type '${safeLine}'`;
+                }
+                if (lines.length > 0) {
+                    // Para enviar la tecla Enter usamos el comando "key"
+                    if (line.length > 0)
+                        cmd += ` && ydotool key Return`;
+                    else
+                        cmd = `ydotool key Return`;
+                }
+            } else {
+                return reject(new Error('Sistema operativo no soportado para enviar texto'));
             }
 
             if (cmd) {
                 exec(cmd, (error, stdout, stderr) => {
                     if (error) {
-                        reject(`Error escribiendo línea con xdotool: ${error}\n\n${stderr}`);
+                        reject(new Error(`Error escribiendo línea: ${error}\n${stderr}`));
                         return;
                     }
-                    // Llamar recursivamente para procesar la siguiente línea
                     typeLines(lines);
                 });
             } else {
@@ -60,50 +72,65 @@ export function sendTextLinux(text) {
     });
 }
 
-
 export async function sendCopyLinux() {
+    console.log('send copy');
     return new Promise((resolve, reject) => {
-        // Primero, obtener el ID de la ventana
-        exec('xdotool getwindowfocus', (error1, stdout1, stderr1) => {
-            if (error1) {
-                return reject(new Error(`Error al obtener el ID de la ventana: ${error1}\n\n${stderr1}`));
-            }
-            wid = String(stdout1).trim();
-            if (!wid) {
-                return reject(new Error('Ventana no encontrada'));
-            }
-           
-            // Luego, realizar la copia
-            exec(`xdotool key --clearmodifiers --window '${wid}' ctrl+c`, (error2) => {
-                if (error2) {
-                    return reject(new Error(`Error al copiar al portapapeles: ${error2}`));
+        if (sessionType === 'x11') {
+            // En X11: obtenemos el ID de la ventana y enviamos ctrl+c con xdotool
+            exec('xdotool getwindowfocus', (error1, stdout1, stderr1) => {
+                if (error1) {
+                    return reject(new Error(`Error al obtener el ID de la ventana: ${error1}\n${stderr1}`));
                 }
-                console.log('ctrl+c enviado');
-                // Resuelve la promesa con el ID de la ventana
+                wid = String(stdout1).trim();
+                if (!wid) {
+                    return reject(new Error('Ventana no encontrada'));
+                }
+                exec(`xdotool key --clearmodifiers --window '${wid}' ctrl+c`, (error2, stdout2, stderr2) => {
+                    if (error2) {
+                        return reject(new Error(`Error al copiar al portapapeles: ${error2}\n${stderr2}`));
+                    }
+                    console.log('ctrl+c enviado (X11)');
+                    resolve();
+                });
+            });
+        } else if (sessionType === 'wayland') {
+            // En Wayland: usamos ydotool para enviar ctrl+c
+            // Simulamos presionar la tecla Ctrl, luego la tecla 'c' y luego liberar Ctrl
+            exec(`ydotool keydown ctrl && ydotool key c && ydotool keyup ctrl`, (error, stdout, stderr) => {
+                if (error) {
+                    return reject(new Error(`Error al copiar con ydotool: ${error}\n${stderr}`));
+                }
+                console.log('ctrl+c enviado (Wayland)');
                 resolve();
             });
-        });
+        } else {
+            reject(new Error('Sistema operativo no soportado para copiar'));
+        }
     });
 }
 
 export function getLinuxWindowGeometry() {
-    const cmd = `xdotool getwindowgeometry --shell ${wid}`;
-    const output = execSync(cmd).toString();
-    const geom = {};
-    const lines = output.split('\n');
-    for (let line of lines) {
-        if (line.startsWith('X=')) {
-            geom.x = parseInt(line.split('=')[1].trim());
-        } else if (line.startsWith('Y=')) {
-            geom.y = parseInt(line.split('=')[1].trim());
-        } else if (line.startsWith('WIDTH=')) {
-            geom.width = parseInt(line.split('=')[1].trim());
-        } else if (line.startsWith('HEIGHT=')) {
-            geom.height = parseInt(line.split('=')[1].trim());
+    if (sessionType === 'x11') {
+        const cmd = `xdotool getwindowgeometry --shell ${wid}`;
+        const output = execSync(cmd).toString();
+        const geom = {};
+        const lines = output.split('\n');
+        for (let line of lines) {
+            if (line.startsWith('X=')) {
+                geom.x = parseInt(line.split('=')[1].trim());
+            } else if (line.startsWith('Y=')) {
+                geom.y = parseInt(line.split('=')[1].trim());
+            } else if (line.startsWith('WIDTH=')) {
+                geom.width = parseInt(line.split('=')[1].trim());
+            } else if (line.startsWith('HEIGHT=')) {
+                geom.height = parseInt(line.split('=')[1].trim()); 
+            }
         }
+        return geom;
+    } else if (sessionType === 'wayland') {
+        // En Wayland no existe un equivalente sencillo para obtener la geometría de la ventana
+        throw new Error('getLinuxWindowGeometry no está implementado en Wayland');
+    } else {
+        throw new Error('Sistema operativo no soportado');
     }
-    return geom;
 }
-
-
-
