@@ -3,16 +3,20 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createConfigWindow } from './windows/configWindow.js';
 import { createOverlayWindow } from './windows/overlayWindow.js';
-import { registerShortcuts, saveShortcuts } from './controllers/shortcutsController.js';
-import { cancelOllama, checkApi } from './controllers/ollamaController.js';
-import { getWindowGeometry } from './controllers/keyboardController.js';
-import { globals } from './globals.js';
+import logger from './services/logger.js';
+import configService from './services/configService.js';
+import ollamaService from './services/ollamaService.js';
+import shortcutService from './services/shortcutService.js';
+import platformService from './services/platformService.js';
+import errorService from './services/errorService.js';
 import i18n from './i18n.js';
+import { APP_CONFIG, WINDOW_CONFIG, TRAY_CONFIG, ANIMATION_CONFIG } from './constants/index.js';
 
 // Only one instance
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
-    app.quit()
+    logger.info('Another instance is already running, exiting');
+    app.quit();
 }
 
 // Get the path of the current directory
@@ -22,74 +26,138 @@ const __dirname = path.dirname(__filename);
 
 Menu.setApplicationMenu(null);
 
-let configWindow = null,
-    transparentWindow = null,
-    tray = null,
-    iconIndex = 0,
-    animationInterval,
-    clickTimeout;
+// Estado de la aplicación
+let configWindow = null;
+let transparentWindow = null;
+let tray = null;
+let iconIndex = 0;
+let animationInterval;
+let clickTimeout;
+let isInferenceActive = false;
+
+logger.info('Application starting', {
+    version: APP_CONFIG.VERSION,
+    platform: process.platform,
+    nodeVersion: process.version
+});
 
 // Hide or show configuration window
 function hideShowConfig() {
-    // Restore/show the main window if it is hidden/minimized
-    if (configWindow.isVisible()) {
-        configWindow.hide();
-    } else {
-        configWindow.show();
-        configWindow.focus();
+    try {
+        if (configWindow.isVisible()) {
+            configWindow.hide();
+            logger.debug('Config window hidden');
+        } else {
+            configWindow.show();
+            configWindow.focus();
+            logger.debug('Config window shown');
+        }
+    } catch (error) {
+        logger.error('Error toggling config window', { error: error.message });
     }
 }
 
 // Create transparent window
 async function createTransparentWindow(obj) {
-    transparentWindow = await createOverlayWindow(obj);
+    try {
+        transparentWindow = await createOverlayWindow(obj);
+        logger.debug('Transparent window created', obj);
+    } catch (error) {
+        logger.error('Failed to create transparent window', { error: error.message });
+        throw error;
+    }
 }
 
 // Remove transparent window
 function removeTransparentWindow() {
-    if (transparentWindow) {
-        transparentWindow.close();
-        transparentWindow = null;
+    try {
+        if (transparentWindow) {
+            transparentWindow.close();
+            transparentWindow = null;
+            logger.debug('Transparent window removed');
+        }
+    } catch (error) {
+        logger.error('Error removing transparent window', { error: error.message });
     }
 }
 
 // Function to get the path of the current icon
 function getIconPath(index) {
     const indexString = index < 10 ? `0${index}` : `${index}`;
-    return path.join(__dirname, `images/animation/frame_${indexString}_delay-0.06s.png`);
+    return path.join(__dirname, `${ANIMATION_CONFIG.ANIMATION_DIR}/frame_${indexString}_delay-0.06s.png`);
 }
 
 // Start inference process
 async function startInference(overlay = true) {
-    if (animationInterval) clearInterval(animationInterval);
-    animationInterval = setInterval(() => {
-        iconIndex = ((iconIndex + 1) % 20);
-        tray.setImage(getIconPath(iconIndex));
-    }, 150);
-    // Create hidden window
-    if (overlay) {
-        let geo = await getWindowGeometry();
-        createTransparentWindow(geo);
+    try {
+        logger.info('Starting inference', { overlay });
+        
+        if (animationInterval) clearInterval(animationInterval);
+        
+        animationInterval = setInterval(() => {
+            iconIndex = ((iconIndex + 1) % ANIMATION_CONFIG.FRAMES);
+            tray.setImage(getIconPath(iconIndex));
+        }, ANIMATION_CONFIG.FRAME_DELAY);
+        
+        // Create overlay window if requested
+        if (overlay) {
+            try {
+                const geometry = await platformService.getWindowGeometry();
+                await createTransparentWindow(geometry);
+            } catch (error) {
+                logger.warn('Failed to create overlay window', { error: error.message });
+                // Continue without overlay
+            }
+        }
+        
+        isInferenceActive = true;
+        
+    } catch (error) {
+        logger.error('Error starting inference', { error: error.message });
+        throw error;
     }
-    globals.inferencia = true;
 }
 
 // Stop inference process
 async function stopInference(overlay = true) {
-    if (animationInterval) clearInterval(animationInterval);
-    tray.setImage(getIconPath(0));
-    if (overlay) {
-        removeTransparentWindow();
+    try {
+        logger.info('Stopping inference', { overlay });
+        
+        if (animationInterval) {
+            clearInterval(animationInterval);
+            animationInterval = null;
+        }
+        
+        tray.setImage(getIconPath(0));
+        
+        if (overlay) {
+            removeTransparentWindow();
+        }
+        
+        isInferenceActive = false;
+        
+    } catch (error) {
+        logger.error('Error stopping inference', { error: error.message });
     }
-    globals.inferencia = false;
 }
 
 // Communication from the configuration window to save shortcuts
 ipcMain.on('save-shortcuts', async (event, shortcuts) => {
-    saveShortcuts(shortcuts);
-    let ollamaIsOk = await checkApi();
-    if (ollamaIsOk) {
-        registerShortcuts(startInference, stopInference);
+    try {
+        logger.info('Saving shortcuts from config window', { count: shortcuts.length });
+        
+        configService.saveShortcuts(shortcuts);
+        
+        const ollamaIsOk = await ollamaService.checkAvailability();
+        if (ollamaIsOk) {
+            shortcutService.setCallbacks(startInference, stopInference);
+            await shortcutService.registerShortcuts();
+        } else {
+            logger.warn('Ollama not available, shortcuts not registered');
+        }
+    } catch (error) {
+        logger.error('Error saving shortcuts', { error: error.message });
+        errorService.handleError('SHORTCUT_SAVE_FAILED', error);
     }
 });
 
@@ -100,8 +168,13 @@ ipcMain.on('external-link', (event, url) => {
 
 // Handle the cancel event from the frontend
 ipcMain.on('cancelar-proceso', () => {
-    cancelOllama();
-    removeTransparentWindow();
+    try {
+        logger.info('Cancel process requested from frontend');
+        ollamaService.cancel();
+        removeTransparentWindow();
+    } catch (error) {
+        logger.error('Error cancelling process', { error: error.message });
+    }
 });
 
 // Listen for translation events from the renderer process
@@ -112,77 +185,155 @@ ipcMain.on('get-translation', (event, key) => {
 
 // Change the language from the renderer and reload translations
 ipcMain.on('change-language', (event, language) => {
-    i18n.setLanguage(language);
-    configWindow.webContents.send('language-changed', i18n.translations); // Send all translations to the renderer
+    try {
+        logger.info('Language change requested', { language });
+        i18n.setLanguage(language);
+        configService.set('language', language);
+        configWindow.webContents.send('language-changed', i18n.translations);
+    } catch (error) {
+        logger.error('Error changing language', { error: error.message });
+    }
 });
 
 // Save configuration from the configuration window
-ipcMain.on('save-config', (event, config) => globals.saveConfig(config));
+ipcMain.on('save-config', (event, config) => {
+    try {
+        logger.info('Configuration save requested', { config });
+        configService.saveConfig(config);
+    } catch (error) {
+        logger.error('Error saving configuration', { error: error.message });
+        errorService.handleError('CONFIG_SAVE_FAILED', error);
+    }
+});
 
 // App initialization
 app.whenReady().then(async () => {
-    const ollamaIsOk = await checkApi();
+    try {
+        logger.info('App ready, initializing...');
+        
+        // Check Ollama availability
+        const ollamaIsOk = await ollamaService.checkAvailability();
+        logger.info('Ollama availability check completed', { available: ollamaIsOk });
 
-    // Create a tray icon
-    tray = new Tray(getIconPath(0));
+        // Create tray icon
+        tray = new Tray(getIconPath(0));
+        logger.debug('Tray icon created');
 
-    const contextMenu = Menu.buildFromTemplate([
-        {
-            label: i18n.t('Configuración (click)'),
-            click: async () => {
-                hideShowConfig();
-            }
-        },
-        {
-            label: i18n.t('Cancelar (doble click)'),
-            click: () => {
-                cancelOllama();
+        // Create context menu
+        const contextMenu = Menu.buildFromTemplate([
+            {
+                label: i18n.t(TRAY_CONFIG.MENU_ITEMS.CONFIG),
+                click: () => hideShowConfig()
             },
-            enabled: true // TODO
-        },
-        {
-            click: () => {
-                if (process.platform !== 'darwin') app.quit();
-                process.exit(0);
+            {
+                label: i18n.t(TRAY_CONFIG.MENU_ITEMS.CANCEL),
+                click: () => {
+                    try {
+                        ollamaService.cancel();
+                        removeTransparentWindow();
+                    } catch (error) {
+                        logger.error('Error cancelling from tray', { error: error.message });
+                    }
+                },
+                enabled: true
             },
-            label: i18n.t('Salir')
-        },
-    ]);
-    tray.setToolTip('Select2LLM');
-    tray.setContextMenu(contextMenu);
-
-    configWindow = await createConfigWindow(ollamaIsOk);
-    if (ollamaIsOk) {
-        configWindow.hide();
-    }
-
-    let clickCount = 0;
-    tray.on('click', (event, bounds) => {
-        clickCount++;
-        if (clickTimeout) clearTimeout(clickTimeout);
-        clickTimeout = setTimeout(() => {
-            if (clickCount === 2) {
-                cancelOllama();
-                clickCount = 0;
-                return;
+            {
+                label: i18n.t(TRAY_CONFIG.MENU_ITEMS.EXIT),
+                click: () => {
+                    logger.info('Exit requested from tray');
+                    if (process.platform !== 'darwin') app.quit();
+                    process.exit(0);
+                }
             }
-            hideShowConfig();
-            clickCount = 0; // Reset the counter
-        }, 300);
-    });
+        ]);
+        
+        tray.setToolTip(TRAY_CONFIG.TOOLTIP);
+        tray.setContextMenu(contextMenu);
 
-    // Register shortcuts from the JSON file
-    if (ollamaIsOk) {
-        registerShortcuts(startInference, stopInference);
+        // Create configuration window
+        configWindow = await createConfigWindow(ollamaIsOk);
+        if (ollamaIsOk) {
+            configWindow.hide();
+        }
+        logger.debug('Configuration window created');
+
+        // Handle tray clicks (single/double click)
+        let clickCount = 0;
+        tray.on('click', (event, bounds) => {
+            clickCount++;
+            if (clickTimeout) clearTimeout(clickTimeout);
+            
+            clickTimeout = setTimeout(() => {
+                try {
+                    if (clickCount === 2) {
+                        // Double click - cancel
+                        logger.debug('Tray double-click detected');
+                        ollamaService.cancel();
+                        removeTransparentWindow();
+                    } else {
+                        // Single click - toggle config
+                        logger.debug('Tray single-click detected');
+                        hideShowConfig();
+                    }
+                } catch (error) {
+                    logger.error('Error handling tray click', { error: error.message });
+                } finally {
+                    clickCount = 0;
+                }
+            }, TRAY_CONFIG.CLICK_TIMEOUT);
+        });
+
+        // Register shortcuts if Ollama is available
+        if (ollamaIsOk) {
+            try {
+                shortcutService.setCallbacks(startInference, stopInference);
+                await shortcutService.registerShortcuts();
+                logger.info('Shortcuts registered successfully');
+            } catch (error) {
+                logger.error('Failed to register shortcuts', { error: error.message });
+            }
+        } else {
+            logger.warn('Ollama not available, skipping shortcut registration');
+        }
+
+        logger.info('Application initialization completed');
+
+    } catch (error) {
+        logger.error('Error during app initialization', { error: error.message });
+        errorService.handleCriticalError('App Initialization', error);
     }
 
     // Ensure the app continues running in the background
     app.on('activate', async () => {
-        if (BrowserWindow.getAllWindows().length === 0) configWindow = await createConfigWindow();
+        try {
+            if (BrowserWindow.getAllWindows().length === 0) {
+                const ollamaIsOk = await ollamaService.checkAvailability();
+                configWindow = await createConfigWindow(ollamaIsOk);
+            }
+        } catch (error) {
+            logger.error('Error on app activate', { error: error.message });
+        }
     });
 });
 
-// Unregister all shortcuts when the app is closed
+// Cleanup when the app is closed
 app.on('will-quit', () => {
-    globalShortcut.unregisterAll();
+    try {
+        logger.info('Application is quitting, cleaning up...');
+        
+        // Unregister all shortcuts
+        shortcutService.unregisterAll();
+        
+        // Cancel any ongoing operations
+        ollamaService.cancel();
+        
+        // Stop any inference process
+        if (isInferenceActive) {
+            stopInference(false); // Don't try to manipulate overlay on exit
+        }
+        
+        logger.info('Cleanup completed');
+    } catch (error) {
+        console.error('Error during cleanup:', error.message);
+    }
 });

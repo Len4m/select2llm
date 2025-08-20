@@ -1,17 +1,23 @@
 // i18n.js
 import fs from 'fs';
 import path from 'path';
-import { globals } from './globals.js'; // Importar el módulo globals
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Función para obtener el idioma por defecto del sistema
+function getDefaultLanguage() {
+    const locale = (process.env.LANG || process.env.LANGUAGE || process.env.LC_ALL || process.env.LC_MESSAGES || '').toLowerCase();
+    if (locale.startsWith('ca')) return 'ca';
+    if (locale.startsWith('es')) return 'es';
+    return 'en';
+}
 
 class I18n {
     constructor() {
-        // Cargar el idioma predeterminado desde globals.language, o 'es' si no está definido
-        this.language = globals.language || 'es';
+        // Cargar el idioma predeterminado del sistema
+        this.language = getDefaultLanguage();
         this.translations = {};
         this.localesDir = path.join(__dirname, 'locales');
         this.loadTranslations();
@@ -20,7 +26,6 @@ class I18n {
     // Cambia el idioma y recarga las traducciones
     setLanguage(language) {
         this.language = language;
-        globals.language = language; // Actualiza el idioma en globals
         this.loadTranslations();
     }
 
