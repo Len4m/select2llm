@@ -9,8 +9,15 @@ const userConfigDir = path.join(os.homedir(), '.select2llm');
 const configFilePath = path.join(userConfigDir, 'config.json');
 
 // Datos de configuración iniciales
+const getDefaultLanguage = () => {
+  const locale = (process.env.LANG || process.env.LANGUAGE || process.env.LC_ALL || process.env.LC_MESSAGES || '').toLowerCase();
+  if (locale.startsWith('ca')) return 'ca';
+  if (locale.startsWith('es')) return 'es';
+  return 'en';
+};
+
 const defaultConfig = {
-  language: 'es',
+  language: getDefaultLanguage(),
   temperature: 0.8,
   'keep-alive': 5,
   host: 'http://127.0.0.1:11434',
