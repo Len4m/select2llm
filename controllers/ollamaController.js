@@ -6,6 +6,33 @@ import http from 'http';
 
 const ollama = new Ollama({ host: globals.host })
 
+// Función para procesar texto y determinar qué se puede enviar de forma segura
+function processSafeText(accumulatedText, lastSentIndex) {
+    // Primero, filtrar todo el contenido de <think>
+    const filteredText = accumulatedText.replace(/<think>[\s\S]*?<\/think>/gi, '');
+    
+    // Verificar si hay una etiqueta <think> abierta sin cerrar
+    const openThinkIndex = accumulatedText.lastIndexOf('<think>');
+    const closeThinkIndex = accumulatedText.lastIndexOf('</think>');
+    
+    let safeText = filteredText;
+    
+    // Si hay una etiqueta <think> abierta después de la última cerrada
+    if (openThinkIndex > closeThinkIndex) {
+        // Encontrar el texto antes de la etiqueta <think> abierta
+        const beforeThink = accumulatedText.substring(0, openThinkIndex);
+        safeText = beforeThink.replace(/<think>[\s\S]*?<\/think>/gi, '');
+    }
+    
+    // Solo enviar el nuevo contenido que es seguro
+    const newSafeContent = safeText.slice(lastSentIndex);
+    
+    return {
+        safeContent: newSafeContent,
+        newSentIndex: safeText.length
+    };
+}
+
 // Llamada a Ollama
 export async function callOllama(prompt, model = 'llama3.2:latest', temperature = 0.8) {
     try {
@@ -19,9 +46,31 @@ export async function callOllama(prompt, model = 'llama3.2:latest', temperature 
                 temperature: parseFloat(temperature)
             }
         })
+        
+        let accumulatedText = '';
+        let lastSentIndex = 0;
+        
         for await (const part of response) {
             if (globals.inferencia) {
-                await sendText(part.response);
+                accumulatedText += part.response;
+                
+                // Procesar texto de forma segura
+                const result = processSafeText(accumulatedText, lastSentIndex);
+                
+                // Enviar solo el contenido seguro
+                if (result.safeContent) {
+                    await sendText(result.safeContent);
+                    lastSentIndex = result.newSentIndex;
+                }
+            }
+        }
+        
+        // Al finalizar el stream, enviar cualquier contenido restante (filtrado)
+        if (globals.inferencia && accumulatedText) {
+            const finalFiltered = accumulatedText.replace(/<think>[\s\S]*?<\/think>/gi, '');
+            const finalContent = finalFiltered.slice(lastSentIndex);
+            if (finalContent) {
+                await sendText(finalContent);
             }
         }
     } catch (err) {
