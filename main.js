@@ -141,6 +141,41 @@ async function stopInference(overlay = true) {
     }
 }
 
+// Update tray menu with current language
+function updateTrayMenu() {
+    if (!tray) return;
+    
+    const contextMenu = Menu.buildFromTemplate([
+        {
+            label: i18n.t('Configuración (click)'),
+            click: () => hideShowConfig()
+        },
+        {
+            label: i18n.t('Cancelar (doble click)'),
+            click: () => {
+                try {
+                    ollamaService.cancel();
+                    removeTransparentWindow();
+                } catch (error) {
+                    logger.error('Error cancelling from tray', { error: error.message });
+                }
+            },
+            enabled: true
+        },
+        {
+            label: i18n.t('Salir'),
+            click: () => {
+                logger.info('Exit requested from tray');
+                if (process.platform !== 'darwin') app.quit();
+                process.exit(0);
+            }
+        }
+    ]);
+    
+    tray.setContextMenu(contextMenu);
+    logger.debug('Tray menu updated with current language', { language: i18n.language });
+}
+
 // Communication from the configuration window to save shortcuts
 ipcMain.on('save-shortcuts', async (event, shortcuts) => {
     try {
@@ -189,6 +224,10 @@ ipcMain.on('change-language', (event, language) => {
         logger.info('Language change requested', { language });
         i18n.setLanguage(language);
         configService.set('language', language);
+        
+        // Update tray menu with new language
+        updateTrayMenu();
+        
         configWindow.webContents.send('language-changed', i18n.translations);
     } catch (error) {
         logger.error('Error changing language', { error: error.message });
@@ -211,6 +250,13 @@ app.whenReady().then(async () => {
     try {
         logger.info('App ready, initializing...');
         
+        // Update i18n with config language if different from current
+        const config = configService.getConfig();
+        const previousLanguage = i18n.language;
+        i18n.updateFromConfig(config);
+        
+        // If language changed, we'll update tray menu after creating it
+        
         // Check Ollama availability
         const ollamaIsOk = await ollamaService.checkAvailability();
         logger.info('Ollama availability check completed', { available: ollamaIsOk });
@@ -219,36 +265,19 @@ app.whenReady().then(async () => {
         tray = new Tray(getIconPath(0));
         logger.debug('Tray icon created');
 
-        // Create context menu
-        const contextMenu = Menu.buildFromTemplate([
-            {
-                label: i18n.t(TRAY_CONFIG.MENU_ITEMS.CONFIG),
-                click: () => hideShowConfig()
-            },
-            {
-                label: i18n.t(TRAY_CONFIG.MENU_ITEMS.CANCEL),
-                click: () => {
-                    try {
-                        ollamaService.cancel();
-                        removeTransparentWindow();
-                    } catch (error) {
-                        logger.error('Error cancelling from tray', { error: error.message });
-                    }
-                },
-                enabled: true
-            },
-            {
-                label: i18n.t(TRAY_CONFIG.MENU_ITEMS.EXIT),
-                click: () => {
-                    logger.info('Exit requested from tray');
-                    if (process.platform !== 'darwin') app.quit();
-                    process.exit(0);
-                }
-            }
-        ]);
+        // Create initial tray menu
+        updateTrayMenu();
         
         tray.setToolTip(TRAY_CONFIG.TOOLTIP);
-        tray.setContextMenu(contextMenu);
+        
+        // Update tray menu if language was different from system language
+        if (previousLanguage !== i18n.language) {
+            logger.info('Language updated from config, updating tray menu', { 
+                from: previousLanguage, 
+                to: i18n.language 
+            });
+            updateTrayMenu();
+        }
 
         // Create configuration window
         configWindow = await createConfigWindow(ollamaIsOk);

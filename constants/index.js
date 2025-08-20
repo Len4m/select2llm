@@ -175,20 +175,14 @@ export const ERROR_CODES = {
 
 export const ANIMATION_CONFIG = {
     FRAMES: 20,
-    FRAME_DELAY: 150, // milliseconds
+    FRAME_DELAY: 100, // milliseconds
     FRAME_PATTERN: 'frame_{index}_delay-0.06s.png',
     ANIMATION_DIR: 'images/animation'
 };
 
 export const TRAY_CONFIG = {
     TOOLTIP: 'Select2LLM',
-    CLICK_TIMEOUT: 300, // milliseconds for double-click detection
-    
-    MENU_ITEMS: {
-        CONFIG: 'Configuración (click)',
-        CANCEL: 'Cancelar (doble click)',
-        EXIT: 'Salir'
-    }
+    CLICK_TIMEOUT: 300 // milliseconds for double-click detection
 };
 
 export const CLIPBOARD_CONFIG = {

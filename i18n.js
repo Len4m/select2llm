@@ -1,23 +1,42 @@
 // i18n.js
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Función para obtener el idioma por defecto del sistema
-function getDefaultLanguage() {
+function getSystemDefaultLanguage() {
     const locale = (process.env.LANG || process.env.LANGUAGE || process.env.LC_ALL || process.env.LC_MESSAGES || '').toLowerCase();
     if (locale.startsWith('ca')) return 'ca';
     if (locale.startsWith('es')) return 'es';
     return 'en';
 }
 
+// Función para cargar el idioma desde la configuración
+function getConfiguredLanguage() {
+    try {
+        const configPath = path.join(os.homedir(), '.select2llm', 'config.json');
+        if (fs.existsSync(configPath)) {
+            const configData = fs.readFileSync(configPath, 'utf-8');
+            const config = JSON.parse(configData);
+            if (config.language && typeof config.language === 'string') {
+                return config.language;
+            }
+        }
+    } catch (error) {
+        // Si hay error leyendo la configuración, usar sistema
+        console.warn('Could not read language from config:', error.message);
+    }
+    return null;
+}
+
 class I18n {
     constructor() {
-        // Cargar el idioma predeterminado del sistema
-        this.language = getDefaultLanguage();
+        // Cargar el idioma de la configuración, si no existe usar el del sistema
+        this.language = getConfiguredLanguage() || getSystemDefaultLanguage();
         this.translations = {};
         this.localesDir = path.join(__dirname, 'locales');
         this.loadTranslations();
@@ -27,6 +46,13 @@ class I18n {
     setLanguage(language) {
         this.language = language;
         this.loadTranslations();
+    }
+
+    // Actualiza el idioma desde la configuración (llamado cuando configService está disponible)
+    updateFromConfig(config) {
+        if (config && config.language && config.language !== this.language) {
+            this.setLanguage(config.language);
+        }
     }
 
     // Carga el archivo JSON de traducciones para el idioma actual

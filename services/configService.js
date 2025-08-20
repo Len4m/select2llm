@@ -18,6 +18,7 @@ export class ConfigService {
         this.defaultConfig = this.getDefaultConfig();
         this.currentConfig = null;
         this.shortcuts = [];
+        this.languageChangeCallback = null;
 
         this.ensureConfigDir();
         this.loadConfiguration();
