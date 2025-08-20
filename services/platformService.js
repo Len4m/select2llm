@@ -8,6 +8,19 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import logger from './logger.js';
 
+// Importar controllers específicos de plataforma
+import { sendCopyLinux, sendTextLinux, getLinuxWindowGeometry } from '../controllers/linuxController.js';
+import { sendCopyWindows, sendTextWindows, getWindowsWindowGeometry } from '../controllers/windowsController.js';
+import { 
+    sendCopyMac, 
+    sendTextMac, 
+    getMacWindowGeometry,
+    getFrontmostApplication,
+    getMacWindowInfo,
+    getSystemInfo,
+    showNotification
+} from '../controllers/macController.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -127,11 +140,11 @@ export class PlatformService {
 
         switch (this.platform) {
             case 'win32':
-                return this.sendCopyWindows();
+                return sendCopyWindows();
             case 'darwin':
-                return this.sendCopyMac();
+                return sendCopyMac();
             case 'linux':
-                return this.sendCopyLinux();
+                return sendCopyLinux();
             default:
                 throw new Error(`Unsupported platform: ${this.platform}`);
         }
@@ -150,11 +163,11 @@ export class PlatformService {
 
         switch (this.platform) {
             case 'win32':
-                return this.sendTextWindows(text);
+                return sendTextWindows(text);
             case 'darwin':
-                return this.sendTextMac(text);
+                return sendTextMac(text);
             case 'linux':
-                return this.sendTextLinux(text);
+                return sendTextLinux(text);
             default:
                 throw new Error(`Unsupported platform: ${this.platform}`);
         }
@@ -170,242 +183,59 @@ export class PlatformService {
 
         switch (this.platform) {
             case 'win32':
-                return this.getWindowsWindowGeometry();
+                return getWindowsWindowGeometry();
             case 'darwin':
-                return defaultGeometry; // macOS no implementado
+                return getMacWindowGeometry();
             case 'linux':
-                return this.getLinuxWindowGeometry();
+                return getLinuxWindowGeometry();
             default:
                 return defaultGeometry;
         }
     }
 
-    // === IMPLEMENTACIONES ESPECÍFICAS DE WINDOWS ===
+    // === MÉTODOS DE UTILIDAD HEREDADOS ===
+    // Los métodos específicos de plataforma ahora se manejan en los controllers dedicados
+
+    // === MÉTODOS ESPECÍFICOS DE MACOS ===
 
     /**
-     * Envía comando de copia en Windows
+     * Obtiene información de la aplicación actualmente enfocada (solo macOS)
      */
-    async sendCopyWindows() {
-        const command = `powershell.exe -ExecutionPolicy Bypass -File ${this.powerShellScripts.copy}`;
-        const result = await this.executeCommand(command, 'Windows copy command');
-        this.windowInfo.hWnd = result;
-        return result;
+    async getFrontmostApplication() {
+        if (this.platform !== 'darwin') {
+            throw new Error('getFrontmostApplication is only available on macOS');
+        }
+        return getFrontmostApplication();
     }
 
     /**
-     * Envía texto en Windows
+     * Obtiene información detallada de la ventana (solo macOS)
      */
-    async sendTextWindows(text) {
-        if (!this.windowInfo.hWnd) {
-            throw new Error('Windows handle not available. Call sendCopyCommand first.');
+    async getMacWindowInfo() {
+        if (this.platform !== 'darwin') {
+            throw new Error('getMacWindowInfo is only available on macOS');
         }
-
-        const escapedText = this.escapeForSendKeys(text);
-        const command = `powershell.exe -ExecutionPolicy Bypass -File ${this.powerShellScripts.sendText} -hWnd ${this.windowInfo.hWnd} -Texto "${escapedText}"`;
-        
-        return this.executeCommand(command, 'Windows send text');
+        return getMacWindowInfo();
     }
 
     /**
-     * Obtiene geometría de ventana en Windows
+     * Obtiene información del sistema (solo macOS)
      */
-    async getWindowsWindowGeometry() {
-        if (!this.windowInfo.hWnd) {
-            throw new Error('Windows handle not available. Call sendCopyCommand first.');
+    async getSystemInfo() {
+        if (this.platform !== 'darwin') {
+            throw new Error('getSystemInfo is only available on macOS');
         }
-
-        const command = `powershell.exe -ExecutionPolicy Bypass -File ${this.powerShellScripts.windowGeometry} -hwnd ${this.windowInfo.hWnd}`;
-        const result = this.executeCommandSync(command, 'Windows window geometry');
-        
-        return JSON.parse(result);
-    }
-
-    // === IMPLEMENTACIONES ESPECÍFICAS DE LINUX ===
-
-    /**
-     * Envía comando de copia en Linux
-     */
-    async sendCopyLinux() {
-        if (this.sessionType === 'x11') {
-            return this.sendCopyLinuxX11();
-        } else if (this.sessionType === 'wayland') {
-            return this.sendCopyLinuxWayland();
-        } else {
-            throw new Error(`Unsupported Linux session type: ${this.sessionType}`);
-        }
+        return getSystemInfo();
     }
 
     /**
-     * Envía comando de copia en Linux X11
+     * Muestra una notificación del sistema (solo macOS)
      */
-    async sendCopyLinuxX11() {
-        const wid = await this.executeCommand('xdotool getwindowfocus', 'Get focused window');
-        this.windowInfo.wid = wid;
-        
-        if (!this.windowInfo.wid) {
-            throw new Error('No focused window found');
+    async showNotification(title, message, subtitle = '') {
+        if (this.platform !== 'darwin') {
+            throw new Error('showNotification is only available on macOS');
         }
-
-        return this.executeCommand(
-            `xdotool key --clearmodifiers --window '${this.windowInfo.wid}' ctrl+c`,
-            'X11 copy command'
-        );
-    }
-
-    /**
-     * Envía comando de copia en Linux Wayland
-     */
-    async sendCopyLinuxWayland() {
-        return this.executeCommand(
-            'ydotool keydown ctrl && ydotool key c && ydotool keyup ctrl',
-            'Wayland copy command'
-        );
-    }
-
-    /**
-     * Envía texto en Linux
-     */
-    async sendTextLinux(text) {
-        const lines = text.split('\n');
-        return this.sendTextLinuxRecursive(lines);
-    }
-
-    /**
-     * Envía líneas de texto recursivamente en Linux
-     */
-    async sendTextLinuxRecursive(lines) {
-        if (lines.length === 0) {
-            return;
-        }
-
-        const line = lines.shift();
-        let command = '';
-
-        if (this.sessionType === 'x11') {
-            command = this.buildX11TextCommand(line, lines.length > 0);
-        } else if (this.sessionType === 'wayland') {
-            command = this.buildWaylandTextCommand(line, lines.length > 0);
-        } else {
-            throw new Error(`Unsupported Linux session type: ${this.sessionType}`);
-        }
-
-        if (command) {
-            await this.executeCommand(command, 'Linux send text line');
-        }
-
-        // Recursivamente procesar las líneas restantes
-        return this.sendTextLinuxRecursive(lines);
-    }
-
-    /**
-     * Construye comando de texto para X11
-     */
-    buildX11TextCommand(line, hasMoreLines) {
-        if (!this.windowInfo.wid) {
-            throw new Error('Window ID not available. Call sendCopyCommand first.');
-        }
-
-        let command = '';
-        
-        if (line.length > 0) {
-            command = this.escapeForBash(['xdotool', 'type', '--clearmodifiers', '--window', this.windowInfo.wid, '--', line]);
-        }
-        
-        if (hasMoreLines) {
-            const enterCmd = `xdotool key --clearmodifiers --window '${this.windowInfo.wid}' Return`;
-            command = line.length > 0 ? `${command} && ${enterCmd}` : enterCmd;
-        }
-
-        return command;
-    }
-
-    /**
-     * Construye comando de texto para Wayland
-     */
-    buildWaylandTextCommand(line, hasMoreLines) {
-        let command = '';
-        
-        if (line.length > 0) {
-            const safeLine = line.replace(/'/g, "'\\''");
-            command = `ydotool type '${safeLine}'`;
-        }
-        
-        if (hasMoreLines) {
-            const enterCmd = 'ydotool key Return';
-            command = line.length > 0 ? `${command} && ${enterCmd}` : enterCmd;
-        }
-
-        return command;
-    }
-
-    /**
-     * Obtiene geometría de ventana en Linux
-     */
-    getLinuxWindowGeometry() {
-        if (this.sessionType === 'x11') {
-            return this.getLinuxWindowGeometryX11();
-        } else if (this.sessionType === 'wayland') {
-            throw new Error('Window geometry not supported in Wayland');
-        } else {
-            throw new Error(`Unsupported Linux session type: ${this.sessionType}`);
-        }
-    }
-
-    /**
-     * Obtiene geometría de ventana en Linux X11
-     */
-    getLinuxWindowGeometryX11() {
-        if (!this.windowInfo.wid) {
-            throw new Error('Window ID not available. Call sendCopyCommand first.');
-        }
-
-        const command = `xdotool getwindowgeometry --shell ${this.windowInfo.wid}`;
-        const output = this.executeCommandSync(command, 'X11 window geometry');
-        
-        const geometry = {};
-        const lines = output.split('\n');
-        
-        for (const line of lines) {
-            if (line.startsWith('X=')) {
-                geometry.x = parseInt(line.split('=')[1].trim());
-            } else if (line.startsWith('Y=')) {
-                geometry.y = parseInt(line.split('=')[1].trim());
-            } else if (line.startsWith('WIDTH=')) {
-                geometry.width = parseInt(line.split('=')[1].trim());
-            } else if (line.startsWith('HEIGHT=')) {
-                geometry.height = parseInt(line.split('=')[1].trim());
-            }
-        }
-
-        return geometry;
-    }
-
-    // === IMPLEMENTACIONES ESPECÍFICAS DE MACOS ===
-
-    /**
-     * Envía comando de copia en macOS
-     */
-    sendCopyMac() {
-        const script = `
-            tell application "System Events"
-                keystroke "c" using {command down}
-            end tell
-        `;
-        
-        return this.executeCommand(`osascript -e '${script}'`, 'macOS copy command');
-    }
-
-    /**
-     * Envía texto en macOS
-     */
-    sendTextMac(text) {
-        const script = `
-            tell application "System Events"
-                keystroke "${text}"
-            end tell
-        `;
-        
-        return this.executeCommand(`osascript -e '${script}'`, 'macOS send text');
+        return showNotification(title, message, subtitle);
     }
 }
 
