@@ -28,5 +28,11 @@
   "Editar": "Editar",
   "Procesando su petición, por favor espere...": "Processant la seva sol·licitud, si us plau, esperi...",
   "Atención: No utilice la aplicación mientras se está procesando su petición.": "Atenció: No utilitzi l'aplicació mentre s'està processant la seva sol·licitud.",
-  "Ventana superpuesta": "Finestra superposada"
+  "Ventana superpuesta": "Finestra superposada",
+  "Añadir Nuevo Atajo": "Afegir Nova Drecera",
+  "Editar Atajo": "Editar Drecera",
+  "Combinación de teclas": "Combinació de tecles",
+  "Prompt": "Prompt",
+  "El texto seleccionado se añadirá al final del prompt": "El text seleccionat s'afegirà al final del prompt",
+  "Mostrar una ventana superpuesta mientras se genera la respuesta": "Mostrar una finestra superposada mentre es genera la resposta"
 }

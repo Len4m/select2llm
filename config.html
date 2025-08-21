@@ -48,55 +48,92 @@
             <li data-i18n="Cargando ..."></li>
         </ul>
     </div>
-    <form id="shortcut-form" class="pure-form" style="padding: 0 15px;">
-        <input type="hidden" name="index" id="index" value="">
-        <fieldset>
-            <legend data-i18n="Configuración de atajos"></legend>
-            <div class="config-short">
-                <div class="key-check">
-                    <input type="checkbox" id="ctrl" name="ctrl" checked>
-                    <label for="ctrl"><img id="ctrl-button" src="images/ctrl-control-button-icon.png"></label>
-                </div>
-                <div class="key-check">
-                    <input type="checkbox" id="alt" name="alt" checked>
-                    <label for="alt"><img src="images/alt-button-icon.png"></label>
-                </div>
-                <div class="key-check">
-                    <input type="checkbox" id="shift" name="shift" checked>
-                    <label for="shift"><img src="images/shift-button-icon.png"></label>
-                </div>
-                <img src="images/math-plus-icon.png" style="height: 18px;width:auto;">
+    
+    <!-- Botón para añadir nuevo atajo -->
+    <div class="button-container">
+        <button id="add-shortcut-btn" class="pure-button pure-button-primary" data-i18n="Añadir Nuevo Atajo">Añadir Nuevo Atajo</button>
+        <a href="#" id="global-settings-btn" class="global-settings-btn" data-i18n="Configuración global"></a>
+    </div>
 
-                <label>
-                    <input type="text" id="key" name="key" style="max-width:32px;font-weight: bold;" maxlength="1"
-                        pattern="[a-zA-Z0-9\+\-.,¡'/*]" required>
-                    <small data-i18n="Tecla (alfanumérica o +-.,¡'/*)"></small>
-                </label>
+    <!-- Modal para configurar atajos -->
+    <div id="shortcut-modal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2 class="modal-title" id="shortcut-modal-title">
+                    <img id="shortcut-modal-icon" src="images/math-plus-icon.png" alt="">
+                    <span data-i18n="Configuración de atajos"></span>
+                </h2>
+                <button class="modal-close shortcut-modal-close" type="button">
+                    <img src="images/close-icon.png" alt="Cerrar">
+                </button>
             </div>
-            <div class="overlay-div">
-                <input type="checkbox" id="overlay" name="overlay" checked></select> <label for="overlay"
-                    data-i18n="Ventana superpuesta"></label>
+            
+            <div class="modal-body">
+                <form id="shortcut-form">
+                    <input type="hidden" name="index" id="index" value="">
+                    
+                    <div class="form-group">
+                        <label class="form-label required" data-i18n="Combinación de teclas">Combinación de teclas</label>
+                        <div class="config-short">
+                            <div class="key-check">
+                                <input type="checkbox" id="ctrl" name="ctrl" checked>
+                                <label for="ctrl"><img id="ctrl-button" src="images/ctrl-control-button-icon.png"></label>
+                            </div>
+                            <div class="key-check">
+                                <input type="checkbox" id="alt" name="alt" checked>
+                                <label for="alt"><img src="images/alt-button-icon.png"></label>
+                            </div>
+                            <div class="key-check">
+                                <input type="checkbox" id="shift" name="shift" checked>
+                                <label for="shift"><img src="images/shift-button-icon.png"></label>
+                            </div>
+                            <img src="images/math-plus-icon.png" style="height: 18px;width:auto;">
+
+                            <label>
+                                <input type="text" id="key" name="key" class="form-input" style="max-width:42px;font-weight: bold;" maxlength="1"
+                                    pattern="[a-zA-Z0-9\+\-.,¡'/*]" required>
+                                <small data-i18n="Tecla (alfanumérica o +-.,¡'/*)"></small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="model" data-i18n="Modelo">Modelo</label>
+                        <select id="model" name="model" class="form-select" required></select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="temperature">
+                            <span data-i18n="Temperatura">Temperatura</span> (<span id="temperatura-span"></span>)
+                        </label>
+                        <input oninput="document.getElementById('temperatura-span').innerText = this.value" 
+                            type="range" min="0" max="1" step="0.01" id="temperature" name="temperature" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="prompt" data-i18n="Prompt">Prompt</label>
+                        <textarea id="prompt" name="prompt" class="form-textarea" rows="4" 
+                            placeholder="Escribe tu prompt aquí. El texto seleccionado se añadirá automáticamente."></textarea>
+                        <span class="form-help" data-i18n="El texto seleccionado se añadirá al final del prompt">El texto seleccionado se añadirá al final del prompt</span>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="form-checkbox">
+                            <input type="checkbox" id="overlay" name="overlay" checked>
+                            <label for="overlay" data-i18n="Ventana superpuesta">Ventana superpuesta</label>
+                        </div>
+                        <span class="form-help" data-i18n="Mostrar una ventana superpuesta mientras se genera la respuesta">Mostrar una ventana superpuesta mientras se genera la respuesta</span>
+                    </div>
+                </form>
             </div>
-            <label for="model" data-i18n="Modelo"></label> <select id="model" name="model" required></select>
-            <br>
-            <label for="temperature"><span data-i18n="Temperatura"></span> (<span id="temperatura-span"></span>)</label>
-            <div id="temperature-div">
-                <input oninput="document.getElementById('temperatura-span').innerText = this.value" type="range" min="0"
-                    max="1" step="0.01" id="temperature" name="temperature" required>
+            
+            <div class="modal-footer">
+                <button id="cancel-btn" type="button" class="pure-button pure-button-secondary" data-i18n="Cancelar">Cancelar</button>
+                <button id="add-btn" type="submit" form="shortcut-form" class="pure-button pure-button-primary" data-i18n="Agregar">Agregar</button>
+                <button id="edit-btn" type="submit" form="shortcut-form" class="pure-button pure-button-primary" data-i18n="Editar">Editar</button>
             </div>
-            <textarea id="prompt" name="prompt"></textarea>
-            <button id="add-btn" type="submit" class="pure-button pure-button-primary"
-                style="border-radius: 4px;margin-top:15px;" data-i18n="Agregar"></button>
-
-            <button id="edit-btn" type="submit" class="pure-button pure-button-primary"
-                style="border-radius: 4px;margin-top:15px;" data-i18n="Editar"></button>
-
-            <button id="cancel-btn" type="button" class="pure-button-secondary pure-button"
-                data-i18n="Cancelar"></button>
-
-            <a href="#" id="global-settings-btn" class="global-settings-btn" data-i18n="Configuración global"></a>
-        </fieldset>
-    </form>
+        </div>
+    </div>
 
     <div id="del-confirm" class="confirm">
         <div>

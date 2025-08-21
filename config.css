@@ -769,7 +769,6 @@ div.atajo-atajo > span.key {
     background-position: var(--space-md) center;
     background-repeat: no-repeat;
     padding: var(--space-md) var(--space-xl) var(--space-md) var(--space-4xl);
-    margin-top: var(--space-xl);
     font-weight: 500;
     font-size: 0.875rem;
     transition: all 0.2s ease;
@@ -814,6 +813,34 @@ div.atajo-atajo > span.key {
 
 #global-config-form .form-group:first-child {
     margin-top: 0;
+}
+
+/* Shortcut Modal Form */
+#shortcut-form {
+    margin: 0;
+    padding: 0;
+}
+
+#shortcut-form .form-group:first-child {
+    margin-top: 0;
+}
+
+/* Ajustes específicos para el formulario de atajos */
+#shortcut-form .config-short {
+    margin-bottom: var(--space-sm);
+}
+
+#shortcut-form .key-check {
+    margin: var(--space-xs);
+}
+
+/* Contenedor de botones alineados */
+.button-container {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0 15px !important;
+    margin-bottom: 20px !important;
 }
 
 /* Alerts */

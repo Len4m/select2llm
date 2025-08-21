@@ -28,5 +28,11 @@
   "Editar": "Edit",
   "Procesando su petición, por favor espere...": "Processing your request, please wait...",
   "Atención: No utilice la aplicación mientras se está procesando su petición.": "Attention: Do not use the application while your request is being processed.",
-  "Ventana superpuesta": "Overlay window"
+  "Ventana superpuesta": "Overlay window",
+  "Añadir Nuevo Atajo": "Add New Shortcut",
+  "Editar Atajo": "Edit Shortcut",
+  "Combinación de teclas": "Key Combination",
+  "Prompt": "Prompt",
+  "El texto seleccionado se añadirá al final del prompt": "Selected text will be added at the end of the prompt",
+  "Mostrar una ventana superpuesta mientras se genera la respuesta": "Show an overlay window while generating the response"
 }

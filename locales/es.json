@@ -28,5 +28,11 @@
   "Editar": "Editar",
   "Procesando su petición, por favor espere...": "Procesando su petición, por favor espere...",
   "Atención: No utilice la aplicación mientras se está procesando su petición.": "Atención: No utilice la aplicación mientras se está procesando su petición.",
-  "Ventana superpuesta": "Ventana superpuesta"
+  "Ventana superpuesta": "Ventana superpuesta",
+  "Añadir Nuevo Atajo": "Añadir Nuevo Atajo",
+  "Editar Atajo": "Editar Atajo",
+  "Combinación de teclas": "Combinación de teclas",
+  "Prompt": "Prompt",
+  "El texto seleccionado se añadirá al final del prompt": "El texto seleccionado se añadirá al final del prompt",
+  "Mostrar una ventana superpuesta mientras se genera la respuesta": "Mostrar una ventana superpuesta mientras se genera la respuesta"
 }

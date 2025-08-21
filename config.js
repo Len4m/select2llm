@@ -172,8 +172,9 @@ function clearForm() {
     document.getElementById('overlay').checked = true;
     document.getElementById('add-btn').style.display = "inline-block";
     document.getElementById('edit-btn').style.display = "none";
-    document.getElementById('cancel-btn').style.display = '';
     
+    // Cerrar modal si está abierto
+    document.getElementById('shortcut-modal').classList.remove('show');
 }
 
 // Edit an existing shortcut and populate the form with its details
@@ -191,12 +192,59 @@ function edit_shortcut(index) {
     document.getElementById('overlay').checked = shortcut.overlay;
     document.getElementById('edit-btn').style.display = "inline-block";
     document.getElementById('add-btn').style.display = "none";
-    document.getElementById('cancel-btn').style.display = 'inline-block';
-    window.scrollTo(0, document.body.scrollHeight);
+    
+    // Actualizar título del modal usando i18n y abrirlo
+    updateModalTitle('Editar Atajo');
+    document.getElementById('shortcut-modal').classList.add('show');
+}
+
+// Función para abrir modal en modo "añadir"
+function openAddShortcutModal() {
+    clearForm();
+    document.getElementById('add-btn').style.display = "inline-block";
+    document.getElementById('edit-btn').style.display = "none";
+    
+    // Actualizar título del modal usando i18n y abrirlo
+    updateModalTitle('Añadir Nuevo Atajo');
+    document.getElementById('shortcut-modal').classList.add('show');
+}
+
+// Función auxiliar para actualizar el título del modal con traducciones
+function updateModalTitle(translationKey) {
+    const titleSpan = document.querySelector('#shortcut-modal-title span');
+    const modalIcon = document.getElementById('shortcut-modal-icon');
+    
+    titleSpan.setAttribute('data-i18n', translationKey);
+    
+    // Cambiar el icono según el modo
+    if (translationKey === 'Añadir Nuevo Atajo') {
+        modalIcon.src = 'images/math-plus-icon.png';
+        modalIcon.alt = 'Añadir';
+    } else if (translationKey === 'Editar Atajo') {
+        modalIcon.src = 'images/edit-icon.png';
+        modalIcon.alt = 'Editar';
+    }
+    
+    // Solicitar la traducción del título
+    ipcRenderer.send('get-translation', translationKey);
 }
 
 // Event listener to clear the form when the cancel button is clicked
 document.getElementById('cancel-btn').addEventListener('click', () => clearForm());
+
+// Event listener for the "Add New Shortcut" button
+document.getElementById('add-shortcut-btn').addEventListener('click', () => {
+    openAddShortcutModal();
+});
+
+// Event listener to close the shortcut modal when clicked outside or on close button
+const shortcutModalDiv = document.getElementById('shortcut-modal');
+shortcutModalDiv.addEventListener('click', function (event) {
+    // If the clicked element is the outer div (not the inner content) or close button
+    if (event.target === shortcutModalDiv || event.target.classList.contains('shortcut-modal-close') || event.target.closest('.modal-close')) {
+        clearForm(); // This already closes the modal
+    }
+});
 
 // Event listener for global configuration buttons to open the configuration modal
 Array.from(document.getElementsByClassName('global-settings-btn')).forEach((a) => {
