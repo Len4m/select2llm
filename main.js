@@ -255,6 +255,39 @@ ipcMain.on('restart-application', (event) => {
     }
 });
 
+// Send UI constants to the configuration window
+ipcMain.on('get-ui-constants', (event) => {
+    try {
+        // Importar dinámicamente las constantes
+        import('./constants/index.js').then(({ UI_CONFIG }) => {
+            logger.debug('Sending UI constants to renderer', { uiConfig: UI_CONFIG });
+            event.reply('ui-constants', UI_CONFIG);
+        }).catch((importError) => {
+            logger.error('Error importing UI constants', { error: importError.message });
+            // Enviar fallback en caso de error
+            event.reply('ui-constants', {
+                ZOOM: {
+                    MIN: 100,
+                    MAX: 150,
+                    DEFAULT: 100,
+                    STEP: 10
+                }
+            });
+        });
+    } catch (error) {
+        logger.error('Error sending UI constants', { error: error.message });
+        // Enviar fallback en caso de error
+        event.reply('ui-constants', {
+            ZOOM: {
+                MIN: 100,
+                MAX: 150,
+                DEFAULT: 100,
+                STEP: 10
+            }
+        });
+    }
+});
+
 // App initialization
 app.whenReady().then(async () => {
     try {

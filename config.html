@@ -124,6 +124,16 @@
                         <option value="en">English</option>
                         <option value="ca">Català</option>
                     </select>
+
+                    <label for="global-config-zoom"><span data-i18n="Zoom de Interfaz"></span> (<span
+                        id="global-config-zoom-span">--</span>%)</label>
+                <input oninput="document.getElementById('global-config-zoom-span').innerText = this.value"
+                    onmouseup="updateZoom(this.value)" onchange="updateZoom(this.value)" onkeyup="updateZoom(this.value)"
+                    type="range" id="global-config-zoom"
+                    name="uiZoom" required style="width:100%;">
+                <span class="pure-form-message-inline"
+                    data-i18n="Controla el tamaño de la interfaz de configuración"></span>
+
                     <label for="global-config-temperature"><span data-i18n="Temperatura"></span> (<span
                             id="global-config-temperatura-span">0.8</span>)</label>
                     <input oninput="document.getElementById('global-config-temperatura-span').innerText = this.value"
@@ -153,6 +163,7 @@
                     </div>
                     <span class="pure-form-message-inline"
                         data-i18n="Si tiene Ollama instalado en local, puede dejarlo en blanco."></span>
+
 
                 </fieldset>
             </form>

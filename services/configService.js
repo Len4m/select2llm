@@ -8,6 +8,7 @@ import path from 'path';
 import os from 'os';
 import { app } from 'electron';
 import logger from './logger.js';
+import { UI_CONFIG } from '../constants/index.js';
 
 export class ConfigService {
     constructor() {
@@ -43,7 +44,8 @@ export class ConfigService {
                 x: undefined,
                 y: undefined,
                 remember: true
-            }
+            },
+            uiZoom: UI_CONFIG.ZOOM.DEFAULT
         };
     }
 
@@ -92,6 +94,13 @@ export class ConfigService {
             normalized.host = normalized.host.replace(/^(https?:)\/\/+/, '$1//');
         }
 
+        // Normalizar uiZoom
+        if (normalized.uiZoom !== undefined) {
+            normalized.uiZoom = typeof normalized.uiZoom === 'string' ? parseInt(normalized.uiZoom) : Number(normalized.uiZoom);
+        } else {
+            normalized.uiZoom = UI_CONFIG.ZOOM.DEFAULT;
+        }
+
         // Asegurar que windowSettings tiene la estructura completa
         if (!normalized.windowSettings) {
             normalized.windowSettings = this.defaultConfig.windowSettings;
@@ -135,6 +144,14 @@ export class ConfigService {
             new URL(config.host);
         } catch {
             errors.push('host must be a valid URL');
+        }
+
+        // Validar zoom de UI
+        if (config.uiZoom !== undefined) {
+            const zoom = Number(config.uiZoom);
+            if (isNaN(zoom) || zoom < UI_CONFIG.ZOOM.MIN || zoom > UI_CONFIG.ZOOM.MAX) {
+                errors.push(`uiZoom must be a number between ${UI_CONFIG.ZOOM.MIN} and ${UI_CONFIG.ZOOM.MAX}`);
+            }
         }
 
         return errors;

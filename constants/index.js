@@ -191,6 +191,15 @@ export const CLIPBOARD_CONFIG = {
     TIMEOUT: 5000 // milliseconds
 };
 
+export const UI_CONFIG = {
+    ZOOM: {
+        MIN: 100,        // Zoom mínimo 100%
+        MAX: 150,       // Zoom máximo 150%
+        DEFAULT: 100,   // Zoom por defecto 100%
+        STEP: 1        // Incrementos de 1%
+    }
+};
+
 // Exportar todo como un objeto para importación selectiva
 export default {
     APP_CONFIG,
@@ -203,5 +212,6 @@ export default {
     ERROR_CODES,
     ANIMATION_CONFIG,
     TRAY_CONFIG,
-    CLIPBOARD_CONFIG
+    CLIPBOARD_CONFIG,
+    UI_CONFIG
 };

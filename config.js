@@ -1,6 +1,10 @@
 // Import necessary modules from 'electron'
 const { clipboard, ipcRenderer } = require('electron');
 
+// Importar constantes UI (necesario convertir el import ES6 a require)
+// Nota: Como config.js usa require y constants usa export, necesitamos una solución
+// Por ahora usaremos valores duplicados que se sincronizan con las constantes
+
 // Detect the current platform (Windows, macOS, etc.)
 const platform = process.platform;
 
@@ -58,6 +62,9 @@ function setConfigFormData(data) {
         }
     }
     document.getElementById('global-config-temperatura-span').innerText = data.temperature;
+    
+    // Cargar el zoom inicial
+    loadInitialZoom(data);
     
     // Almacenar el valor original del host y verificar el estado inicial
     originalHostValue = data.host || "http://127.0.0.1:11434";
@@ -441,6 +448,65 @@ hostInput.addEventListener("blur", checkHostChange);
 // Añadir event listener al botón de reinicio
 restartButton.addEventListener("click", restartApplication);
 
+// Función para actualizar el zoom de la página en tiempo real
+window.updateZoom = function(value) {
+    document.body.style.zoom = value + '%';
+};
+
+// Solicitar las constantes de UI al proceso principal
+let UI_CONSTANTS = null;
+
+// Función para solicitar las constantes UI del proceso principal
+function requestUIConstants() {
+    ipcRenderer.send('get-ui-constants');
+}
+
+// Recibir las constantes UI del proceso principal
+ipcRenderer.on('ui-constants', (event, constants) => {
+    UI_CONSTANTS = constants;
+    console.log('UI Constants loaded:', UI_CONSTANTS);
+});
+
+// Función para cargar el zoom inicial desde la configuración
+function loadInitialZoom(config) {
+    const zoomSlider = document.getElementById('global-config-zoom');
+    const zoomSpan = document.getElementById('global-config-zoom-span');
+    
+    // Si no tenemos las constantes aún, solicitarlas
+    if (!UI_CONSTANTS) {
+        requestUIConstants();
+        // Usar valores temporales mientras llegan las constantes
+        UI_CONSTANTS = {
+            ZOOM: {
+                MIN: 100,
+                MAX: 150, 
+                DEFAULT: 100,
+                STEP: 10
+            }
+        };
+    }
+    
+    const { MIN, MAX, DEFAULT, STEP } = UI_CONSTANTS.ZOOM;
+    
+    // Configurar los límites del slider dinámicamente
+    zoomSlider.min = MIN;
+    zoomSlider.max = MAX;
+    zoomSlider.step = STEP;
+    
+    if (config.uiZoom !== undefined) {
+        // Asegurar que el valor esté dentro de los límites
+        const zoomValue = Math.max(MIN, Math.min(MAX, config.uiZoom));
+        zoomSlider.value = zoomValue;
+        zoomSpan.innerText = zoomValue;
+        updateZoom(zoomValue);
+    } else {
+        // Usar valor por defecto
+        zoomSlider.value = DEFAULT;
+        zoomSpan.innerText = DEFAULT;
+        updateZoom(DEFAULT);
+    }
+}
+
 // Guardar el host cuando se cierra la ventana de configuración (si ha cambiado)
 window.addEventListener('beforeunload', () => {
     const currentValue = hostInput.value.trim() || "http://127.0.0.1:11434";
@@ -493,3 +559,8 @@ function loadAllTranslations() {
         ipcRenderer.send('get-translation', key); // Request translation from the main process
     });
 }
+
+loadAllTranslations();
+
+// Solicitar las constantes UI al cargar la página
+requestUIConstants();

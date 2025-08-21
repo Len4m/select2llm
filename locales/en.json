@@ -13,6 +13,8 @@
   "Reiniciar": "Restart",
   "⚠️ Atención:": "⚠️ Warning:",
   "Al modificar el host de Ollama, necesitas reiniciar la aplicación para que los cambios tengan efecto.": "When modifying the Ollama host, you need to restart the application for changes to take effect.",
+  "Zoom de Interfaz": "Interface Zoom",
+  "Controla el tamaño de la interfaz de configuración": "Controls the size of the configuration interface",
   "minutos": "minutes",
   "Cargando ...": "Loading ...",
   "Configuración de atajos": "Shortcut Settings",
