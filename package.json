@@ -11,9 +11,10 @@
   },
   "main": "main.js",
   "scripts": {
-    "start": "export ELECTRON_OZONE_PLATFORM_HINT=auto && electron .",
+    "start": "electron .",
     "build": "electron-builder",
-    "rebuild": "npm rebuild --runtime=electron --target=32.1.2 --disturl=https://atom.io/download/atom-shell --abi=20.17.0",
+    "rebuild": "electron-rebuild -f",
+    "postinstall": "electron-rebuild -f || echo \"(no native modules)\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "license": "GPL-3.0",
@@ -26,10 +27,10 @@
     "electron-builder": "^26.0.12"
   },
   "build": {
+    "asar": true,
     "appId": "com.lenam.Select2llm",
     "productName": "Select2LLM",
     "icon": "images/icon-transparent.png",
-    "asar": false,
     "linux": {
       "category": "Utility",
       "icon": "images/icon-transparent.png",

@@ -26,7 +26,7 @@ const __dirname = path.dirname(__filename);
 
 Menu.setApplicationMenu(null);
 
-// Estado de la aplicación
+// Application state
 let configWindow = null;
 let transparentWindow = null;
 let tray = null;
