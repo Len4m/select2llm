@@ -120,7 +120,7 @@ export async function createConfigWindow(ollamaIsOk) {
             });
         });
     } catch (error) {
-        console.error(error);
+        logger.error('Error creating config window', { error: error.message, stack: error.stack });
     }
     return configWindow;
 }

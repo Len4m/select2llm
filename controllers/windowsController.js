@@ -1,6 +1,7 @@
 import { exec, execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import logger from '../services/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,7 +40,7 @@ export function sendCopyWindows() {
     return new Promise((resolve, reject) => {
         exec(`powershell.exe -ExecutionPolicy Bypass -File ${powerShellCopy}`, (error, stdout, stderr) => {
             if (error) {
-                console.error(`Error al ejecutar el script ${powerShellCopy}:\n${error}`);
+                logger.error('Error executing PowerShell copy script', { script: powerShellCopy, error: error.message });
                 reject(error);
                 return;
             }
@@ -55,7 +56,7 @@ export function sendTextWindows(text) {
         if (!escapeText.length|| !text.length) resolve();
         exec(`powershell.exe -ExecutionPolicy Bypass -File ${powerShellSendText} -hWnd ${hWnd} -Texto "${escapeText}"`, (error, stdout, stderr) => {
             if (error) {
-                console.error(`Error al ejecutar el script ${powerShellSendText}:\n${error}`);
+                logger.error('Error executing PowerShell sendText script', { script: powerShellSendText, error: error.message });
                 reject(error);
                 return;
             }
@@ -66,7 +67,7 @@ export function sendTextWindows(text) {
 
 export async function getWindowsWindowGeometry() {
     const cmd = `powershell.exe -ExecutionPolicy Bypass -File ${powerShellWinGeo} -hwnd ${hWnd}`;
-    console.log(cmd);
+    logger.debug('Executing PowerShell command for window geometry', { command: cmd });
     const geom = JSON.parse(execSync(cmd).toString());
     return geom;
 }

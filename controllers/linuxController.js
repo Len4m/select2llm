@@ -1,4 +1,5 @@
 import { exec, execSync } from 'child_process';
+import logger from '../services/logger.js';
 
 let wid;
 const sessionType = (process.env.XDG_SESSION_TYPE || '').toLowerCase(); // 'wayland' o 'x11'
@@ -73,7 +74,6 @@ export function sendTextLinux(text) {
 }
 
 export async function sendCopyLinux() {
-    console.log('send copy');
     return new Promise((resolve, reject) => {
         if (sessionType === 'x11') {
             // En X11: obtenemos el ID de la ventana y enviamos ctrl+c con xdotool
@@ -89,7 +89,7 @@ export async function sendCopyLinux() {
                     if (error2) {
                         return reject(new Error(`Error al copiar al portapapeles: ${error2}\n${stderr2}`));
                     }
-                    console.log('ctrl+c enviado (X11)');
+                    logger.debug('Ctrl+C sent via X11');
                     resolve();
                 });
             });
@@ -100,7 +100,7 @@ export async function sendCopyLinux() {
                 if (error) {
                     return reject(new Error(`Error al copiar con ydotool: ${error}\n${stderr}`));
                 }
-                console.log('ctrl+c enviado (Wayland)');
+                logger.debug('Ctrl+C sent via Wayland');
                 resolve();
             });
         } else {

@@ -1,6 +1,14 @@
 // Import necessary modules from 'electron'
 const { clipboard, ipcRenderer } = require('electron');
 
+// Import logger (using dynamic import for ES module compatibility)
+let logger;
+import('../services/logger.js').then((module) => {
+    logger = module.default;
+}).catch((error) => {
+    console.error('Failed to import logger:', error);
+});
+
 // Importar constantes UI (necesario convertir el import ES6 a require)
 // Nota: Como config.js usa require y constants usa export, necesitamos una solución
 // Por ahora usaremos valores duplicados que se sincronizan con las constantes
@@ -464,7 +472,9 @@ function requestUIConstants() {
 // Recibir las constantes UI del proceso principal
 ipcRenderer.on('ui-constants', (event, constants) => {
     UI_CONSTANTS = constants;
-    console.log('UI Constants loaded:', UI_CONSTANTS);
+    if (logger) {
+        logger.debug('UI Constants loaded', { constants: UI_CONSTANTS });
+    }
 });
 
 // Función para cargar el zoom inicial desde la configuración

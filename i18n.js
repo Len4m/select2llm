@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url';
+import logger from './services/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +29,7 @@ function getConfiguredLanguage() {
         }
     } catch (error) {
         // Si hay error leyendo la configuración, usar sistema
-        console.warn('Could not read language from config:', error.message);
+        logger.warn('Could not read language from config', { error: error.message });
     }
     return null;
 }

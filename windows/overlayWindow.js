@@ -78,7 +78,7 @@ export async function createOverlayWindow(obj) {
             });
         });
     } catch (error) {
-        console.error(error);
+        logger.error('Error creating overlay window', { error: error.message, stack: error.stack });
     }
     return overlayWindow;
 

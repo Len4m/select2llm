@@ -1,4 +1,5 @@
 import { exec, execSync } from 'child_process';
+import logger from '../services/logger.js';
 
 /**
  * Controller específico para macOS
@@ -68,7 +69,7 @@ export async function getFrontmostApplication() {
  * @returns {Promise<void>}
  */
 export async function sendCopyMac() {
-    console.log('send copy mac');
+    logger.debug('Sending copy command on macOS');
     
     // Primero obtenemos la aplicación enfocada para el contexto
     await getFrontmostApplication();
@@ -81,7 +82,7 @@ export async function sendCopyMac() {
     
     try {
         await executeAppleScript(script, 'macOS copy command');
-        console.log(`Cmd+C sent to ${currentApp?.name || 'unknown app'}`);
+        logger.debug('Cmd+C sent to app', { appName: currentApp?.name || 'unknown app' });
     } catch (error) {
         throw new Error(`Failed to send copy command: ${error.message}`);
     }
@@ -97,7 +98,7 @@ export async function sendTextMac(text) {
         return;
     }
 
-    console.log(`Sending text to macOS: ${text.substring(0, 50)}${text.length > 50 ? '...' : ''}`);
+    logger.debug('Sending text to macOS', { textPreview: text.substring(0, 50) + (text.length > 50 ? '...' : ''), textLength: text.length });
     
     // Escapar el texto para AppleScript
     const escapedText = escapeForAppleScript(text);
@@ -225,7 +226,7 @@ export async function activateApplication(appName) {
     
     try {
         await executeAppleScript(script, `Activate application ${appName}`);
-        console.log(`Application ${appName} activated`);
+        logger.debug('Application activated', { appName });
     } catch (error) {
         throw new Error(`Failed to activate application ${appName}: ${error.message}`);
     }

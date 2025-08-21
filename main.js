@@ -406,6 +406,6 @@ app.on('will-quit', () => {
         
         logger.info('Cleanup completed');
     } catch (error) {
-        console.error('Error during cleanup:', error.message);
+        logger.error('Error during cleanup', { error: error.message, stack: error.stack });
     }
 });
