@@ -411,7 +411,140 @@ div.atajo-atajo > span.key {
     box-shadow: var(--shadow-lg);
 }
 
-/* Modal Styles */
+/* Modal System - Reutilizable */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.modal-content.small {
+    max-width: 400px;
+    width: 90vw;
+}
+
+.modal-content.medium {
+    max-width: 600px;
+    width: 90vw;
+}
+
+.modal-content.large {
+    max-width: 800px;
+    width: 90vw;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-xl) var(--space-xl) var(--space-lg) var(--space-xl);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.modal-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modal-title img {
+    width: 24px;
+    height: 24px;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    color: var(--text-muted);
+}
+
+.modal-close:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
+.modal-close img {
+    width: 16px;
+    height: 16px;
+    opacity: 0.6;
+}
+
+.modal-close:hover img {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: var(--space-xl);
+    overflow-y: auto;
+    max-height: calc(90vh - 140px);
+}
+
+.modal-footer {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+    padding: var(--space-lg) var(--space-xl);
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+}
+
+/* Animaciones */
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+    from { 
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to { 
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Retrocompatibilidad */
 .confirm {
     display: none;
     position: fixed;
@@ -429,13 +562,121 @@ div.atajo-atajo > span.key {
 .confirm > div {
     background: var(--surface);
     text-align: center;
-    padding: 2rem;
+    padding: var(--space-3xl);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     border: 1px solid var(--border);
     max-width: 90vw;
     max-height: 90vh;
     overflow: auto;
+}
+
+/* Form Components para Modales */
+.form-group {
+    margin-bottom: var(--space-xl);
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+    font-size: 0.875rem;
+}
+
+.form-label.required::after {
+    content: " *";
+    color: var(--error);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: var(--space-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    line-height: 1.5;
+}
+
+.form-help {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: var(--space-xs);
+    line-height: 1.4;
+}
+
+.form-error {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--error);
+    margin-top: var(--space-xs);
+    line-height: 1.4;
+}
+
+.form-row {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Checkbox y Radio especiales para modales */
+.form-checkbox,
+.form-radio {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    cursor: pointer;
+    padding: var(--space-sm);
+    border-radius: var(--radius);
+    transition: background-color 0.2s ease;
+}
+
+.form-checkbox:hover,
+.form-radio:hover {
+    background-color: var(--surface-hover);
+}
+
+.form-checkbox input,
+.form-radio input {
+    margin: 0;
+    accent-color: var(--primary-color);
+}
+
+.form-checkbox label,
+.form-radio label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: 500;
 }
 
 /* Pure Button Overrides - Unified Button System */
@@ -565,63 +806,14 @@ div.atajo-atajo > span.key {
     transition: all 0.2s ease;
 }
 
-/* Global Config Form */
+/* Global Config Form - Usando nuevo sistema de modales */
 #global-config-form {
-    min-width: 480px;
-    margin-top: 1.25rem;
-    position: relative;
-    background: var(--surface);
+    margin: 0;
+    padding: 0;
 }
 
-#global-config-form select {
-    width: 220px;
-}
-
-#global-config-form label {
-    width: auto;
-    min-width: 8rem;
-}
-
-#global-config-form > fieldset > legend {
-    font-size: 1.25rem;
-    padding-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.global-config-close {
-    width: 24px;
-    height: 24px;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    opacity: 0.6;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-radius: var(--radius);
-    padding: 0.25rem;
-}
-
-.global-config-close:hover {
-    opacity: 1;
-    background: var(--surface-hover);
-}
-
-#global-config-box {
-    text-align: left;
-    margin: 1rem;
-}
-
-#global-config-form legend {
-    padding-bottom: 0 !important;
-}
-
-#global-config-box label {
-    width: 100%;
-    margin: 1rem 0 0.5rem 0;
-    font-weight: 600;
-    color: var(--text-primary);
+#global-config-form .form-group:first-child {
+    margin-top: 0;
 }
 
 /* Alerts */

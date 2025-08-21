@@ -202,7 +202,7 @@ document.getElementById('cancel-btn').addEventListener('click', () => clearForm(
 Array.from(document.getElementsByClassName('global-settings-btn')).forEach((a) => {
     a.addEventListener('click', (e) => {
         e.preventDefault();
-        document.getElementById('global-config').style.display = 'flex';
+        document.getElementById('global-config').classList.add('show');
     });
 });
 
@@ -336,9 +336,9 @@ function beep() {
 // Add event listener to close the global configuration modal when clicked outside or on close button
 const globalConfigDiv = document.getElementById('global-config');
 globalConfigDiv.addEventListener('click', function (event) {
-    // If the clicked element is the outer div (not the inner content)
-    if (event.target === globalConfigDiv || event.target.classList.contains('global-config-close')) {
-        globalConfigDiv.style.display = '';
+    // If the clicked element is the outer div (not the inner content) or close button
+    if (event.target === globalConfigDiv || event.target.classList.contains('global-config-close') || event.target.closest('.modal-close')) {
+        globalConfigDiv.classList.remove('show');
     }
 });
 

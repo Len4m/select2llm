@@ -108,65 +108,78 @@
         </div>
     </div>
 
-    <div id="global-config" class="confirm">
-        <div id="global-config-box">
-
-            <form id="global-config-form" class="pure-form pure-form-stacked">
-                <img src="images/close-icon.png" class="global-config-close">
-                <fieldset>
-                    <legend>
-                        <img src="images/settings-icon.png" style="max-width:25px;vertical-align: middle;">
-                        <span data-i18n="Configuración global"></span>
-                    </legend>
-                    <label for="global-config-language" data-i18n="Idioma"></label>
-                    <select id="global-config-language" name="language" style="width:100%;">
-                        <option value="es">Español</option>
-                        <option value="en">English</option>
-                        <option value="ca">Català</option>
-                    </select>
-
-                    <label for="global-config-zoom"><span data-i18n="Zoom de Interfaz"></span> (<span
-                        id="global-config-zoom-span">--</span>%)</label>
-                <input oninput="document.getElementById('global-config-zoom-span').innerText = this.value"
-                    onmouseup="updateZoom(this.value)" onchange="updateZoom(this.value)" onkeyup="updateZoom(this.value)"
-                    type="range" id="global-config-zoom"
-                    name="uiZoom" required style="width:100%;">
-                <span class="pure-form-message-inline"
-                    data-i18n="Controla el tamaño de la interfaz de configuración"></span>
-
-                    <label for="global-config-temperature"><span data-i18n="Temperatura"></span> (<span
-                            id="global-config-temperatura-span">0.8</span>)</label>
-                    <input oninput="document.getElementById('global-config-temperatura-span').innerText = this.value"
-                        type="range" min="0" max="1" step="0.01" value="0.8" id="global-config-temperature"
-                        name="temperature" required style="width:100%;">
-                    <span class="pure-form-message-inline"
-                        data-i18n="Configuración por defecto por los nuevos atajos"></span>
-                    <label for="global-config-keep-alive"><span data-i18n="Keep Alive"></span> (<span
-                            id="global-config-keep-alive-span">5</span>
-                        <span data-i18n="minutos">minutos</span>)</label>
-                    <input oninput="document.getElementById('global-config-keep-alive-span').innerText = this.value"
-                        type="number" min="1" max="1440" step="1" value="5" id="global-config-keep-alive"
-                        name="keep-alive" required>
-                    <span class="pure-form-message-inline"
-                        data-i18n="Controla cuánto tiempo el modelo permanecerá cargado en la memoria después de la solicitud"></span>
-                    <label for="global-config-host" data-i18n="Ollama API Host"></label>
-                    <div style="display: flex; gap: 10px; align-items: flex-start;">
-                        <input placeholder="http://127.0.0.1:11434" style="flex: 1;" type="url" name="host"
-                            id="global-config-host" value="http://127.0.0.1:11434">
-                        <button type="button" id="restart-button" class="pure-button pure-button-primary"
-                            style="background-color: #ff6b35; border-radius: 4px; padding: 8px 12px; font-size: 12px;"
-                            disabled data-i18n="Reiniciar">Reiniciar</button>
+    <div id="global-config" class="modal">
+        <div class="modal-content medium">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <img src="images/settings-icon.png" alt="">
+                    <span data-i18n="Configuración global"></span>
+                </h2>
+                <button class="modal-close global-config-close" type="button">
+                    <img src="images/close-icon.png" alt="Cerrar">
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="global-config-form">
+                    <div class="form-group">
+                        <label class="form-label" for="global-config-language" data-i18n="Idioma"></label>
+                        <select id="global-config-language" name="language" class="form-select">
+                            <option value="es">Español</option>
+                            <option value="en">English</option>
+                            <option value="ca">Català</option>
+                        </select>
                     </div>
-                    <div id="host-change-warning" style="display: none; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 10px; margin-top: 8px; color: #856404;">
-                        <strong data-i18n="⚠️ Atención:">⚠️ Atención:</strong>
-                        <span data-i18n="Al modificar el host de Ollama, necesitas reiniciar la aplicación para que los cambios tengan efecto.">Al modificar el host de Ollama, necesitas reiniciar la aplicación para que los cambios tengan efecto.</span>
+
+                    <div class="form-group">
+                        <label class="form-label" for="global-config-zoom">
+                            <span data-i18n="Zoom de Interfaz"></span> (<span id="global-config-zoom-span">--</span>%)
+                        </label>
+                        <input oninput="document.getElementById('global-config-zoom-span').innerText = this.value"
+                            onmouseup="updateZoom(this.value)" onchange="updateZoom(this.value)" onkeyup="updateZoom(this.value)"
+                            type="range" id="global-config-zoom" name="uiZoom" required>
+                        <span class="form-help" data-i18n="Controla el tamaño de la interfaz de configuración"></span>
                     </div>
-                    <span class="pure-form-message-inline"
-                        data-i18n="Si tiene Ollama instalado en local, puede dejarlo en blanco."></span>
 
+                    <div class="form-group">
+                        <label class="form-label" for="global-config-temperature">
+                            <span data-i18n="Temperatura"></span> (<span id="global-config-temperatura-span">0.8</span>)
+                        </label>
+                        <input oninput="document.getElementById('global-config-temperatura-span').innerText = this.value"
+                            type="range" min="0" max="1" step="0.01" value="0.8" id="global-config-temperature"
+                            name="temperature" required>
+                        <span class="form-help" data-i18n="Configuración por defecto por los nuevos atajos"></span>
+                    </div>
 
-                </fieldset>
-            </form>
+                    <div class="form-group">
+                        <label class="form-label" for="global-config-keep-alive">
+                            <span data-i18n="Keep Alive"></span> (<span id="global-config-keep-alive-span">5</span>
+                            <span data-i18n="minutos">minutos</span>)
+                        </label>
+                        <input oninput="document.getElementById('global-config-keep-alive-span').innerText = this.value"
+                            type="number" min="1" max="1440" step="1" value="5" id="global-config-keep-alive"
+                            name="keep-alive" required class="form-input">
+                        <span class="form-help" data-i18n="Controla cuánto tiempo el modelo permanecerá cargado en la memoria después de la solicitud"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="global-config-host" data-i18n="Ollama API Host"></label>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input placeholder="http://127.0.0.1:11434" type="url" name="host"
+                                    id="global-config-host" value="http://127.0.0.1:11434" class="form-input">
+                            </div>
+                            <button type="button" id="restart-button" class="pure-button pure-button-primary"
+                                style="background-color: #ff6b35; min-width: 100px;" disabled data-i18n="Reiniciar">Reiniciar</button>
+                        </div>
+                        <div id="host-change-warning" style="display: none; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 10px; margin-top: 8px; color: #856404;">
+                            <strong data-i18n="⚠️ Atención:">⚠️ Atención:</strong>
+                            <span data-i18n="Al modificar el host de Ollama, necesitas reiniciar la aplicación para que los cambios tengan efecto.">Al modificar el host de Ollama, necesitas reiniciar la aplicación para que los cambios tengan efecto.</span>
+                        </div>
+                        <span class="form-help" data-i18n="Si tiene Ollama instalado en local, puede dejarlo en blanco."></span>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
