@@ -133,7 +133,7 @@ export class PlatformService {
     }
 
     /**
-     * Envía comando de copia según la plataforma
+     * Envía comando de copia según la plataforma y devuelve el identificador de la ventana
      */
     async sendCopyCommand() {
         logger.platformOperation('sendCopyCommand', this.platform);
