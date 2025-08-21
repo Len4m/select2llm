@@ -19,11 +19,11 @@
   "license": "GPL-3.0",
   "dependencies": {
     "clipboardy": "^4.0.0",
-    "ollama": "^0.5.9"
+    "ollama": "^0.5.17"
   },
   "devDependencies": {
-    "electron": "^32.1.2",
-    "electron-builder": "^25.0.5"
+    "electron": "^37.3.1",
+    "electron-builder": "^26.0.12"
   },
   "build": {
     "appId": "com.lenam.Select2llm",
