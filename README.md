@@ -12,6 +12,7 @@
 - **Gestión de configuraciones desde la aplicación**: La configuración de combinaciones de teclas y prompts se realiza directamente desde la interfaz de la aplicación, sin necesidad de editar archivos manualmente.
 - **Lista de modelos ordenada alfabéticamente**: Los modelos disponibles en Ollama se muestran organizados alfabéticamente para facilitar la selección.
 - **Filtrado inteligente de contenido de thinking**: Los modelos con capacidad de razonamiento (como o1) filtran automáticamente el contenido de `<think>` para mostrar solo la respuesta final.
+- **Zoom de interfaz configurable**: Ajusta el tamaño de la interfaz de configuración entre 100% y 150% para mejorar la legibilidad y accesibilidad.
 - **Configuración global personalizable**: Define preferencias generales como el idioma, temperatura del modelo y otros parámetros globales desde un archivo de configuración sencillo.
 - **Arquitectura de servicios mejorada**: Sistema robusto con manejo de errores, logging y gestión de configuración modular.
 - **Flexibilidad de uso**: Procesa el texto seleccionado con cualquier modelo LLM cargado en Ollama para generar respuestas de manera ágil y eficiente.
@@ -154,7 +155,8 @@ El formato de este archivo es el siguiente:
   "language": "es",
   "temperature": 0.8,
   "keep-alive": 5,
-  "host": "http://127.0.0.1:11434"
+  "host": "http://127.0.0.1:11434",
+  "uiZoom": 100
 }
 ```
 
@@ -162,6 +164,7 @@ El formato de este archivo es el siguiente:
 - **temperature**: Valor por defecto de creatividad del modelo para todas las consultas.
 - **keep-alive**: Tiempo en minutos que el modelo permanecerá en memoria.
 - **host**: URL del servidor Ollama que se utilizará para procesar las peticiones.
+- **uiZoom**: Nivel de zoom de la interfaz de configuración (100% - 150%), útil para mejorar la legibilidad en pantallas de alta resolución.
 
 ## Uso
 
@@ -193,6 +196,11 @@ La aplicación ha sido refactorizada con una arquitectura modular y robusta:
 ### Organización de Modelos
 - **Ordenación alfabética**: Los modelos se muestran automáticamente ordenados por nombre
 - **Gestión mejorada**: Lista más clara y fácil de navegar en la interfaz de configuración
+
+### Accesibilidad y Usabilidad
+- **Zoom de interfaz**: Control deslizante para ajustar el tamaño de la interfaz entre 100% y 150%
+- **Configuración en tiempo real**: Los cambios de zoom se aplican instantáneamente sin necesidad de reiniciar
+- **Persistencia**: El nivel de zoom se guarda automáticamente y se restaura al abrir la aplicación
 
 ## Motivación del proyecto
 
