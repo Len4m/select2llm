@@ -10,7 +10,10 @@
 - **Acceso rápido y configurable a modelos LLM**: Selecciona texto en cualquier aplicación y envíalo a un modelo de tu elección con una simple combinación de teclas.
 - **Soporta múltiples combinaciones de teclas y prompts**: Configura diferentes combinaciones de teclas para acceder a diferentes modelos LLM con distintos prompts predefinidos, añadiendo el texto seleccionado al final del prompt.
 - **Gestión de configuraciones desde la aplicación**: La configuración de combinaciones de teclas y prompts se realiza directamente desde la interfaz de la aplicación, sin necesidad de editar archivos manualmente.
+- **Lista de modelos ordenada alfabéticamente**: Los modelos disponibles en Ollama se muestran organizados alfabéticamente para facilitar la selección.
+- **Filtrado inteligente de contenido de thinking**: Los modelos con capacidad de razonamiento (como o1) filtran automáticamente el contenido de `<think>` para mostrar solo la respuesta final.
 - **Configuración global personalizable**: Define preferencias generales como el idioma, temperatura del modelo y otros parámetros globales desde un archivo de configuración sencillo.
+- **Arquitectura de servicios mejorada**: Sistema robusto con manejo de errores, logging y gestión de configuración modular.
 - **Flexibilidad de uso**: Procesa el texto seleccionado con cualquier modelo LLM cargado en Ollama para generar respuestas de manera ágil y eficiente.
 - **Privacidad de tus datos**: Al utilizar Ollama, evitas depender de APIs externas (como OpenAI) y mantienes la privacidad de tus datos procesados.
 
@@ -33,6 +36,8 @@ Para que Select2LLM funcione correctamente, es necesario instalar algunas depend
   ```bash
   ollama pull llama3.2
   ```
+
+  **Nota**: Select2LLM es compatible con todos los modelos de Ollama, incluyendo modelos con capacidad de razonamiento que utilizan etiquetas `<think>`. La aplicación filtra automáticamente el contenido de thinking para mostrar solo las respuestas finales.
 
 - **Linux**:
   - **xclip** y **xdotool**: Para instalar estas dependencias, ejecuta:
@@ -166,6 +171,29 @@ El formato de este archivo es el siguiente:
 
 > La aplicación utiliza el portapapeles y `xdotool` para acceder al contenido seleccionado en otras aplicaciones y simular pulsaciones de teclas.
 
+## Mejoras Técnicas Recientes
+
+### Filtrado Inteligente de Thinking
+Select2LLM incluye un sistema avanzado de filtrado que procesa automáticamente las respuestas de modelos con capacidad de razonamiento:
+
+- **Detección automática**: Identifica y filtra contenido entre etiquetas `<think>` y `</think>`
+- **Procesamiento en tiempo real**: Mantiene la experiencia de streaming mientras filtra el contenido de razonamiento
+- **Manejo seguro de etiquetas**: Evita mostrar contenido parcial cuando las etiquetas se dividen entre chunks del stream
+- **Compatibilidad universal**: Funciona con cualquier modelo que utilice el formato de thinking
+
+### Arquitectura de Servicios
+La aplicación ha sido refactorizada con una arquitectura modular y robusta:
+
+- **OllamaService**: Gestión mejorada de la comunicación con Ollama
+- **ConfigService**: Manejo centralizado de configuración con validación
+- **ErrorService**: Sistema de manejo de errores robusto y consistente
+- **Logger**: Sistema de logging estructurado para depuración y monitoreo
+- **PlatformService**: Abstracción multiplataforma mejorada
+
+### Organización de Modelos
+- **Ordenación alfabética**: Los modelos se muestran automáticamente ordenados por nombre
+- **Gestión mejorada**: Lista más clara y fácil de navegar en la interfaz de configuración
+
 ## Motivación del proyecto
 
 La idea detrás de Select2LLM surgió por la frustración de tener que buscar plugins para ChatGPT/Ollama en cada aplicación donde quería usar LLMs, lo cual resultaba en una experiencia deficiente y, generalmente, terminaba en la API de OpenAI, sacrificando la privacidad de mis datos procesados. Con Select2LLM, ahora es posible acceder a diferentes modelos y prompts preconfigurados con solo una pulsación de teclas, haciendo que cualquier tarea sea más eficiente.
@@ -185,10 +213,13 @@ Select2LLM es la primera aplicación que desarrollo en [Electron](https://www.el
 
 ## Mejoras Futuras
 
-- Mejorar la eficiencia del pulsado de teclas.
-- Dar la opción de enviar el resultado con pulsado de teclas o con pegar desde el portapapeles.
-- Pruebas y desarrollo para MacOS.
-- ...
+- **Mejoras de interfaz**: Optimización de la experiencia de usuario en la interfaz de configuración
+- **Soporte multiplataforma**: Mejorar el soporte para Windows y completar el desarrollo para macOS
+- **Opciones de salida**: Dar la opción de enviar el resultado con pulsado de teclas o con pegar desde el portapapeles
+- **Plantillas de prompts**: Sistema de plantillas predefinidas para casos de uso comunes
+- **Historial de interacciones**: Registro opcional de consultas realizadas
+- **Temas personalizables**: Soporte para temas claros y oscuros en la interfaz
+- **Actualizaciones automáticas**: Sistema de actualización automática de la aplicación
 
 ## Licencia
 
