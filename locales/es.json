@@ -34,5 +34,9 @@
   "Combinación de teclas": "Combinación de teclas",
   "Prompt": "Prompt",
   "El texto seleccionado se añadirá al final del prompt": "El texto seleccionado se añadirá al final del prompt",
-  "Mostrar una ventana superpuesta mientras se genera la respuesta": "Mostrar una ventana superpuesta mientras se genera la respuesta"
+  "Mostrar una ventana superpuesta mientras se genera la respuesta": "Mostrar una ventana superpuesta mientras se genera la respuesta",
+  "Tema de Interfaz": "Tema de Interfaz",
+  "Claro": "Claro",
+  "Oscuro": "Oscuro",
+  "Selecciona el tema visual de la aplicación": "Selecciona el tema visual de la aplicación"
 }

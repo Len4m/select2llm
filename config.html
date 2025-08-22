@@ -17,7 +17,7 @@
                 <span id="author-link">len4m.github.io</span>
             </p>
         </div>
-        <div class="flex-items"><img src="images/icon.png" class="logo"></div>
+        <div class="flex-items"><img src="images/icon-transparent.png" class="logo"></div>
     </div>
 
     <div style="padding:0 15px;">
@@ -51,8 +51,14 @@
     
     <!-- Botón para añadir nuevo atajo -->
     <div class="button-container">
-        <button id="add-shortcut-btn" class="pure-button pure-button-primary" data-i18n="Añadir Nuevo Atajo">Añadir Nuevo Atajo</button>
-        <a href="#" id="global-settings-btn" class="global-settings-btn" data-i18n="Configuración global"></a>
+        <button id="add-shortcut-btn" class="pure-button pure-button-primary">
+            <img src="images/math-plus-icon.png" alt="">
+            <span data-i18n="Añadir Nuevo Atajo">Añadir Nuevo Atajo</span>
+        </button>
+        <a href="#" id="global-settings-id-btn" class="global-settings-btn">
+            <img src="images/settings-icon.png" alt="">
+            <span data-i18n="Configuración global">Configuración global</span>
+        </a>
     </div>
 
     <!-- Modal para configurar atajos -->
@@ -101,6 +107,13 @@
                         <label class="form-label required" for="model" data-i18n="Modelo">Modelo</label>
                         <select id="model" name="model" class="form-select" required></select>
                     </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="prompt" data-i18n="Prompt">Prompt</label>
+                        <textarea id="prompt" name="prompt" class="form-textarea" rows="4" 
+                            placeholder="Escribe tu prompt aquí. El texto seleccionado se añadirá automáticamente."></textarea>
+                        <span class="form-help" data-i18n="El texto seleccionado se añadirá al final del prompt">El texto seleccionado se añadirá al final del prompt</span>
+                    </div>
                     
                     <div class="form-group">
                         <label class="form-label" for="temperature">
@@ -111,14 +124,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label required" for="prompt" data-i18n="Prompt">Prompt</label>
-                        <textarea id="prompt" name="prompt" class="form-textarea" rows="4" 
-                            placeholder="Escribe tu prompt aquí. El texto seleccionado se añadirá automáticamente."></textarea>
-                        <span class="form-help" data-i18n="El texto seleccionado se añadirá al final del prompt">El texto seleccionado se añadirá al final del prompt</span>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="form-checkbox">
+                        <div class="form-checkbox" onclick="document.getElementById('overlay').checked = !document.getElementById('overlay').checked">
                             <input type="checkbox" id="overlay" name="overlay" checked>
                             <label for="overlay" data-i18n="Ventana superpuesta">Ventana superpuesta</label>
                         </div>
@@ -166,6 +172,15 @@
                             <option value="en">English</option>
                             <option value="ca">Català</option>
                         </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="global-config-theme" data-i18n="Tema de Interfaz">Tema de Interfaz</label>
+                        <select id="global-config-theme" name="theme" class="form-select">
+                            <option value="light" data-i18n="Claro">Claro</option>
+                            <option value="dark" data-i18n="Oscuro">Oscuro</option>
+                        </select>
+                        <span class="form-help" data-i18n="Selecciona el tema visual de la aplicación">Selecciona el tema visual de la aplicación</span>
                     </div>
 
                     <div class="form-group">

@@ -34,6 +34,29 @@
     --space-4xl: 2.5rem;    /* 40px */
 }
 
+/* Dark Theme Variables */
+[data-theme="dark"] {
+    /* Dark Color Palette */
+    --primary-color: #818cf8; /* Indigo 400 - más claro para contraste */
+    --primary-hover: #6366f1;
+    --primary-light: #4338ca;
+    --secondary-color: #334155; /* Slate 700 */
+    --background: #0f172a; /* Slate 900 */
+    --surface: #1e293b; /* Slate 800 */
+    --surface-hover: #334155; /* Slate 700 */
+    --text-primary: #f1f5f9; /* Slate 100 */
+    --text-secondary: #cbd5e1; /* Slate 300 */
+    --text-muted: #94a3b8; /* Slate 400 */
+    --border: #475569; /* Slate 600 */
+    --border-range: #94a3b8; /* Slate 400 */
+    --border-focus: var(--primary-color);
+    --success: #34d399; /* Emerald 400 */
+    --warning: #fbbf24; /* Amber 400 */
+    --error: #f87171; /* Red 400 */
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+}
+
 * {
     box-sizing: border-box;
 }
@@ -46,6 +69,39 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     min-height: 100vh;
+}
+
+/* Dark mode: eliminar degradados innecesarios */
+[data-theme="dark"] body {
+    background: var(--background); /* Color sólido en lugar de degradado */
+}
+
+[data-theme="dark"] .modal-content {
+    background: var(--surface); /* Color sólido en lugar de degradado */
+}
+
+[data-theme="dark"] .pure-button-primary {
+    background: var(--primary-color); /* Color sólido en lugar de degradado */
+}
+
+[data-theme="dark"] .pure-button-primary:hover {
+    background: var(--primary-hover); /* Color sólido en lugar de degradado */
+}
+
+/* Quitar degradados del listado de shortcuts en modo oscuro */
+[data-theme="dark"] .atajo-li {
+    background: var(--surface); /* Color sólido en lugar de degradado */
+}
+
+/* Arreglar colores del botón eliminar en modo oscuro */
+[data-theme="dark"] .button-error {
+    background: var(--error); /* Color sólido */
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .button-error:hover {
+    background: #dc2626; /* Color sólido más oscuro */
+    color: var(--text-primary);
 }
 
 h1 {
@@ -223,6 +279,15 @@ div.key-check input[type="checkbox"] + label img {
 div.key-check input[type="checkbox"]:checked + label img {
     opacity: 1;
     filter: grayscale(0%) drop-shadow(0 2px 4px rgb(99 102 241 / 0.3));
+}
+
+/* Modo oscuro: Sobrescribir filtros para iconos de teclas */
+[data-theme="dark"] div.key-check input[type="checkbox"] + label img {
+    filter: grayscale(100%) brightness(0) invert(1) !important;
+}
+
+[data-theme="dark"] div.key-check input[type="checkbox"]:checked + label img {
+    filter: grayscale(0%) brightness(0) invert(1) drop-shadow(0 2px 4px rgb(99 102 241 / 0.3)) !important;
 }
 
 div.key-check img {
@@ -757,40 +822,11 @@ div.atajo-atajo > span.key {
 }
 
 /* Global Settings */
-#global-settings-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-sm);
-    text-decoration: none;
-    color: var(--text-secondary);
-    float: right;
-    background-image: url(images/settings-icon.png);
-    background-size: 18px 18px;
-    background-position: var(--space-md) center;
-    background-repeat: no-repeat;
-    padding: var(--space-md) var(--space-xl) var(--space-md) var(--space-4xl);
-    font-weight: 500;
-    font-size: 0.875rem;
-    transition: all 0.2s ease;
-    border-radius: var(--radius);
-    border: 1px solid transparent;
-    background-color: transparent;
-    min-height: 40px;
-    box-sizing: border-box;
-}
 
-#global-settings-btn:hover {
-    background-color: var(--surface);
-    border-color: var(--border);
-    color: var(--text-secondary);
-    box-shadow: var(--shadow);
-    transform: translateY(-1px);
-}
 
-#global-settings-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
+
+
+
 
 #cancel-btn {
     border-radius: var(--radius);
@@ -841,6 +877,103 @@ div.atajo-atajo > span.key {
     align-items: center !important;
     padding: 0 15px !important;
     margin-bottom: 20px !important;
+}
+
+/* Botón añadir atajo con icono */
+#add-shortcut-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+#add-shortcut-btn img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1); /* Icono blanco en modo claro (fondo azul) */
+}
+
+/* Dark Mode Icon Filters */
+[data-theme="dark"] img {
+    filter: brightness(0) invert(1);
+}
+
+/* Excepciones para iconos que no deben invertirse */
+[data-theme="dark"] .logo {
+    filter: none; /* El logo mantiene sus colores originales */
+}
+
+[data-theme="dark"] img[src*="checkbox-cross-red-icon"] {
+    filter: none; /* El icono rojo de eliminar mantiene su color */
+}
+
+/* Excepción: Botón configuración global NO se invierte en modo claro */
+#global-settings-id-btn img {
+    filter: none; /* Sin filtro en modo claro - mantiene color original negro */
+}
+
+[data-theme="dark"] #add-shortcut-btn img {
+    filter: brightness(0) invert(1); /* Mantener blanco, no aplicar filtro doble */
+}
+
+/* Botón configuración global - estilos base */
+#global-settings-id-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    text-decoration: none;
+    color: var(--text-secondary);
+    padding: var(--space-md) var(--space-xl);
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    background-color: transparent;
+    min-height: 40px;
+    box-sizing: border-box;
+}
+
+#global-settings-id-btn img {
+    width: 18px;
+    height: 18px;
+}
+
+#global-settings-id-btn:hover {
+    background-color: var(--surface);
+    border-color: var(--border);
+    color: var(--text-secondary);
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
+}
+
+#global-settings-id-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Modo oscuro: Botón configuración global SÍ se invierte */
+[data-theme="dark"] #global-settings-id-btn img {
+    filter: brightness(0) invert(1); /* SÍ invertir en modo oscuro para que sea blanco */
+}
+
+/* Modo oscuro: Iconos del formulario de atajos deben ser blancos */
+[data-theme="dark"] .key-check label img,
+[data-theme="dark"] .config-short img[src*="math-plus-icon"],
+[data-theme="dark"] #ctrl-button,
+[data-theme="dark"] img[src*="alt-button-icon"],
+[data-theme="dark"] img[src*="shift-button-icon"],
+[data-theme="dark"] img[src*="ctrl-control-button-icon"] {
+    filter: brightness(0) invert(1) !important; /* Iconos blancos en modo oscuro */
+}
+
+[data-theme="dark"] #global-settings-id-btn {
+    color: var(--text-primary); /* Texto más visible en modo oscuro */
+}
+
+[data-theme="dark"] #global-settings-id-btn:hover {
+    background-color: var(--secondary-color); /* Color más contrastante */
+    color: var(--text-primary); /* Mantener contraste en hover */
+    border: 1px solid var(--border);
 }
 
 /* Alerts */

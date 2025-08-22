@@ -21,6 +21,7 @@ let shortcuts = [];
 let models = [];
 let global_config = {
     language: 'es',
+    theme: 'light',
     temperature: 0.8,
     'keep-alive': 5,
     host: 'http://127.0.0.1:11434',
@@ -59,6 +60,11 @@ ipcRenderer.on('load-ollama-ok', (event, isOk) => {
     }
 });
 
+// Function to apply theme to the document
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme || 'light');
+}
+
 // Set form data from a given configuration object
 function setConfigFormData(data) {
     for (const key in data) {
@@ -70,6 +76,9 @@ function setConfigFormData(data) {
         }
     }
     document.getElementById('global-config-temperatura-span').innerText = data.temperature;
+    
+    // Apply theme
+    applyTheme(data.theme);
     
     // Cargar el zoom inicial
     loadInitialZoom(data);
@@ -492,6 +501,10 @@ form.addEventListener("change", (event) => {
     // Si el cambio proviene del campo host, no guardarlo automáticamente
     if (event.target && event.target.name === "host") {
         getFormData(true); // Excluir el host del guardado automático
+    } else if (event.target && event.target.name === "theme") {
+        // Aplicar el tema inmediatamente cuando cambia
+        applyTheme(event.target.value);
+        getFormData(); // Guardar la configuración
     } else {
         getFormData(); // Guardado normal para otros campos
     }
@@ -577,6 +590,9 @@ window.addEventListener('beforeunload', () => {
 });
 
 clearForm();
+
+// Apply initial theme (default to light)
+applyTheme(global_config.theme);
 
 /* i18n (internationalization) */
 // Request and load a specific translation
