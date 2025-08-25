@@ -30,34 +30,31 @@ export function sendTextLinux(text) {
             if (sessionType === 'x11') {
                 // En X11: usamos xdotool y el ID de la ventana (wid)
                 logger.debug('Preparando comando para enviar texto en X11', { line, wid });
-                if (line.length > 0) {
+                
+                const buildXdotoolCommand = (action, args = []) => {
+                    const baseArgs = ['xdotool', action, '--clearmodifiers'];
                     if (wid) {
-                        cmd = escapeForBash(['xdotool', 'type', '--delay', '1', '--clearmodifiers', '--window', wid, '--', line]);
-                        logger.debug('Comando generado con wid', { cmd });
-                    } else {
-                        cmd = escapeForBash(['xdotool', 'type', '--delay 1','--clearmodifiers', '--', line]);
-                        logger.debug('Comando generado sin wid', { cmd });
+                        baseArgs.push('--window', wid);
                     }
+                    return escapeForBash([...baseArgs, ...args]);
+                };
+
+                const commands = [];
+
+                // Añadir comando de escritura si hay texto
+                if (line.length > 0) {
+                    commands.push(buildXdotoolCommand('type', ['--delay', '1', '--', line]));
+                    logger.debug('Comando de escritura generado', { cmd: commands[commands.length - 1] });
                 }
+
+                // Añadir comando de Enter si hay más líneas
                 if (lines.length > 0) {
-                    if (line.length > 0) {
-                        if (wid) {
-                            cmd += ` && xdotool key --clearmodifiers --window '${wid}' Return`;
-                            logger.debug('Añadiendo enter con wid', { cmd });
-                        } else {
-                            cmd += ` && xdotool key --clearmodifiers Return`;
-                            logger.debug('Añadiendo enter sin wid', { cmd });
-                        }
-                    } else {
-                        if (wid) {
-                            cmd = `xdotool key --clearmodifiers --window '${wid}' Return`;
-                            logger.debug('Solo enter con wid', { cmd });
-                        } else {
-                            cmd = `xdotool key --clearmodifiers Return`;
-                            logger.debug('Solo enter sin wid', { cmd });
-                        }
-                    }
+                    commands.push(buildXdotoolCommand('key', ['Return']));
+                    logger.debug('Comando de Enter añadido', { cmd: commands[commands.length - 1] });
                 }
+
+                cmd = commands.join(' && ');
+                logger.debug('Comando final X11', { cmd });
             } else if (sessionType === 'wayland') {
                 // En Wayland: usamos ydotool en lugar de wtype
                 if (line.length > 0) {
