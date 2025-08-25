@@ -181,6 +181,7 @@ function clearForm() {
     document.getElementById('overlay').checked = true;
     document.getElementById('add-btn').style.display = "inline-block";
     document.getElementById('edit-btn').style.display = "none";
+    document.getElementById('cancel-btn').style.display = "none";
     
     // Cerrar modal si está abierto
     document.getElementById('shortcut-modal').classList.remove('show');
@@ -201,6 +202,7 @@ function edit_shortcut(index) {
     document.getElementById('overlay').checked = shortcut.overlay;
     document.getElementById('edit-btn').style.display = "inline-block";
     document.getElementById('add-btn').style.display = "none";
+    document.getElementById('cancel-btn').style.display = "inline-block";
     
     // Actualizar título del modal usando i18n y abrirlo
     updateModalTitle('Editar Atajo');
@@ -212,6 +214,7 @@ function openAddShortcutModal() {
     clearForm();
     document.getElementById('add-btn').style.display = "inline-block";
     document.getElementById('edit-btn').style.display = "none";
+    document.getElementById('cancel-btn').style.display = "inline-block";
     
     // Actualizar título del modal usando i18n y abrirlo
     updateModalTitle('Añadir Nuevo Atajo');

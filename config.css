@@ -586,10 +586,17 @@ div.atajo-atajo > span.key {
 .modal-footer {
     display: flex;
     gap: var(--space-md);
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     padding: var(--space-lg) var(--space-xl);
     border-top: 1px solid var(--border);
     background: var(--surface);
+}
+
+.modal-actions {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
 }
 
 /* Animaciones */
@@ -829,16 +836,7 @@ div.atajo-atajo > span.key {
 
 
 #cancel-btn {
-    border-radius: var(--radius);
-    margin-top: var(--space-lg);
     display: none;
-    text-align: right;
-    padding: var(--space-md) var(--space-xl);
-    min-height: 40px;
-    box-sizing: border-box;
-    font-weight: 500;
-    font-size: 0.875rem;
-    transition: all 0.2s ease;
 }
 
 /* Global Config Form - Usando nuevo sistema de modales */

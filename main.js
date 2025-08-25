@@ -10,7 +10,7 @@ import shortcutService from './services/shortcutService.js';
 import platformService from './services/platformService.js';
 import errorService from './services/errorService.js';
 import i18n from './i18n.js';
-import { APP_CONFIG, WINDOW_CONFIG, TRAY_CONFIG, ANIMATION_CONFIG } from './constants/index.js';
+import { APP_CONFIG, TRAY_CONFIG, ANIMATION_CONFIG } from './constants/index.js';
 
 // Only one instance
 const gotTheLock = app.requestSingleInstanceLock();
