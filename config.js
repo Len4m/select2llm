@@ -62,7 +62,28 @@ ipcRenderer.on('load-ollama-ok', (event, isOk) => {
 
 // Function to apply theme to the document
 function applyTheme(theme) {
+    console.log('Applying theme:', theme); // Debug log
     document.documentElement.setAttribute('data-theme', theme || 'light');
+    
+    // Actualizar el logo según el tema con un pequeño delay para asegurar que el DOM esté listo
+    setTimeout(() => {
+        const logoElement = document.querySelector('.logo');
+        if (logoElement) {
+            const newLogoSrc = theme === 'dark' ? 'images/logo-oscuro.png' : 'images/logo-claro.png';
+            console.log('Updating logo to:', newLogoSrc); // Debug log
+            logoElement.src = newLogoSrc;
+        } else {
+            // Si el logo no está disponible aún, reintentar después de un delay adicional
+            setTimeout(() => {
+                const retryLogoElement = document.querySelector('.logo');
+                if (retryLogoElement) {
+                    const newLogoSrc = theme === 'dark' ? 'images/logo-oscuro.png' : 'images/logo-claro.png';
+                    console.log('Retry updating logo to:', newLogoSrc); // Debug log
+                    retryLogoElement.src = newLogoSrc;
+                }
+            }, 200);
+        }
+    }, 50);
 }
 
 // Set form data from a given configuration object
@@ -641,3 +662,14 @@ loadAllTranslations();
 
 // Solicitar las constantes UI al cargar la página
 requestUIConstants();
+
+// Añadir event listener específico para el selector de tema después de que se haya cargado el DOM
+document.addEventListener('DOMContentLoaded', () => {
+    const themeSelector = document.getElementById('global-config-theme');
+    if (themeSelector) {
+        themeSelector.addEventListener('change', (event) => {
+            console.log('Theme selector changed to:', event.target.value); // Debug log
+            applyTheme(event.target.value);
+        });
+    }
+});

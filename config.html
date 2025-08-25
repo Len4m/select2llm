@@ -11,13 +11,13 @@
 
 <body>
     <div class="flex-container">
+        <div class="flex-items"><img src="images/logo-claro.png" class="logo"></div>
         <div class="flex-items">
-            <h1>Select<span style="color:#58bf93;margin:0 2px;">2</span><span style="color:#2c9bb4">LLM</span></h1>
             <p style="margin:0;padding:0;font-size:12px;">Author: Lenam<br>
                 <span id="author-link">len4m.github.io</span>
             </p>
         </div>
-        <div class="flex-items"><img src="images/icon-transparent.png" class="logo"></div>
+        
     </div>
 
     <div style="padding:0 15px;">
@@ -224,9 +224,9 @@
                                     id="global-config-host" value="http://127.0.0.1:11434" class="form-input">
                             </div>
                             <button type="button" id="restart-button" class="pure-button pure-button-primary"
-                                style="background-color: #ff6b35; min-width: 100px;" disabled data-i18n="Reiniciar">Reiniciar</button>
+                                style="background-color: var(--warning); min-width: 100px;" disabled data-i18n="Reiniciar">Reiniciar</button>
                         </div>
-                        <div id="host-change-warning" style="display: none; background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 10px; margin-top: 8px; color: #856404;">
+                        <div id="host-change-warning" style="display: none; background-color: var(--surface-hover); border: 1px solid var(--border); border-radius: 4px; padding: 10px; margin-top: 8px; color: var(--text-secondary);">
                             <strong data-i18n="⚠️ Atención:">⚠️ Atención:</strong>
                             <span data-i18n="Al modificar el host de Ollama, necesitas reiniciar la aplicación para que los cambios tengan efecto.">Al modificar el host de Ollama, necesitas reiniciar la aplicación para que los cambios tengan efecto.</span>
                         </div>

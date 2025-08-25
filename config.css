@@ -1,19 +1,19 @@
 /* Modern Select2LLM Configuration Interface */
 
 :root {
-    /* Modern Color Palette */
-    --primary-color: #6366f1; /* Indigo */
-    --primary-hover: #4f46e5;
-    --primary-light: #a5b4fc;
-    --secondary-color: #f1f5f9; /* Slate 100 */
-    --background: #f8fafc; /* Slate 50 */
-    --surface: #ffffff;
-    --surface-hover: #f1f5f9;
-    --text-primary: #0f172a; /* Slate 900 */
-    --text-secondary: #64748b; /* Slate 500 */
-    --text-muted: #94a3b8; /* Slate 400 */
-    --border: #e2e8f0; /* Slate 200 */
-    --border-range: #6f757c; /* Slate 200 */
+    /* Select2LLM Brand Color Palette */
+    --primary-color: #1483e0; /* Select2LLM Blue */
+    --primary-hover: #0f6bb8; /* Darker blue for hover */
+    --primary-light: #5ba3e8; /* Lighter blue for accents */
+    --secondary-color: #f8fafc; /* Light gray background */
+    --background: #fbfafa; /* Softer white background as requested */
+    --surface: #ffffff; /* White surface */
+    --surface-hover: #f1f5f9; /* Light gray hover */
+    --text-primary: #1f2c39; /* Select2LLM Dark Gray */
+    --text-secondary: #475569; /* Medium gray for secondary text */
+    --text-muted: #64748b; /* Muted gray for less important text */
+    --border: #e2e8f0; /* Light gray borders */
+    --border-range: #6f757c; /* Medium gray for range inputs */
     --border-focus: var(--primary-color);
     --success: #10b981; /* Emerald 500 */
     --warning: #f59e0b; /* Amber 500 */
@@ -36,19 +36,19 @@
 
 /* Dark Theme Variables */
 [data-theme="dark"] {
-    /* Dark Color Palette */
-    --primary-color: #818cf8; /* Indigo 400 - más claro para contraste */
-    --primary-hover: #6366f1;
-    --primary-light: #4338ca;
-    --secondary-color: #334155; /* Slate 700 */
-    --background: #0f172a; /* Slate 900 */
-    --surface: #1e293b; /* Slate 800 */
-    --surface-hover: #334155; /* Slate 700 */
-    --text-primary: #f1f5f9; /* Slate 100 */
-    --text-secondary: #cbd5e1; /* Slate 300 */
-    --text-muted: #94a3b8; /* Slate 400 */
-    --border: #475569; /* Slate 600 */
-    --border-range: #94a3b8; /* Slate 400 */
+    /* Select2LLM Dark Theme Color Palette */
+    --primary-color: #5ba3e8; /* Lighter blue for better contrast on dark */
+    --primary-hover: #1483e0; /* Original blue for hover */
+    --primary-light: #1f2c39; /* Dark gray for light elements */
+    --secondary-color: #334155; /* Dark gray background */
+    --background: #0f161f; /* Darker background as requested */
+    --surface: #2d3e50; /* Slightly lighter dark gray for surfaces */
+    --surface-hover: #475569; /* Medium gray for hover states */
+    --text-primary: #f8fafc; /* Light gray for primary text */
+    --text-secondary: #cbd5e1; /* Medium light gray for secondary text */
+    --text-muted: #94a3b8; /* Muted gray for less important text */
+    --border: #475569; /* Medium gray for borders */
+    --border-range: #94a3b8; /* Light gray for range inputs */
     --border-focus: var(--primary-color);
     --success: #34d399; /* Emerald 400 */
     --warning: #fbbf24; /* Amber 400 */
@@ -63,7 +63,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, var(--background) 0%, #e2e8f0 100%);
+    background: linear-gradient(135deg, var(--background) 0%, #f1f5f9 100%);
     margin: 0;
     padding: var(--space-xl);
     color: var(--text-primary);
@@ -114,9 +114,7 @@ h1 {
 }
 
 .logo {
-    width: 70%;
-    max-width: 150px;
-    filter: drop-shadow(var(--shadow));
+    max-width: 250px;
 }
 
 .clearfix {
@@ -182,7 +180,7 @@ select:focus,
 textarea:focus {
     outline: none;
     border-color: var(--border-focus);
-    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+    box-shadow: 0 0 0 3px rgb(20 131 224 / 0.1);
 }
 
 input[type="checkbox"] {
@@ -278,7 +276,7 @@ div.key-check input[type="checkbox"] + label img {
 
 div.key-check input[type="checkbox"]:checked + label img {
     opacity: 1;
-    filter: grayscale(0%) drop-shadow(0 2px 4px rgb(99 102 241 / 0.3));
+    filter: grayscale(0%) drop-shadow(0 2px 4px rgb(20 131 224 / 0.3));
 }
 
 /* Modo oscuro: Sobrescribir filtros para iconos de teclas */
@@ -287,7 +285,7 @@ div.key-check input[type="checkbox"]:checked + label img {
 }
 
 [data-theme="dark"] div.key-check input[type="checkbox"]:checked + label img {
-    filter: grayscale(0%) brightness(0) invert(1) drop-shadow(0 2px 4px rgb(99 102 241 / 0.3)) !important;
+    filter: grayscale(0%) brightness(0) invert(1) drop-shadow(0 2px 4px rgb(20 131 224 / 0.3)) !important;
 }
 
 div.key-check img {
@@ -327,7 +325,7 @@ textarea#prompt {
 /* Shortcut Items */
 .atajo-li {
     display: block !important;
-    background: linear-gradient(135deg, var(--surface) 0%, #f8fafc 100%);
+    background: linear-gradient(135deg, var(--surface) 0%, #f1f5f9 100%);
     /* Reset any flex properties that might interfere */
     flex-direction: initial;
     justify-content: initial;
@@ -471,7 +469,7 @@ div.atajo-atajo > span.key {
 }
 
 .button-secondary:hover {
-    background: linear-gradient(135deg, var(--primary-hover) 0%, #3730a3 100%);
+    background: linear-gradient(135deg, var(--primary-hover) 0%, #0f6bb8 100%);
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
 }
@@ -484,7 +482,7 @@ div.atajo-atajo > span.key {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(15, 23, 42, 0.8);
+    background-color: rgba(31, 44, 57, 0.8);
     backdrop-filter: blur(4px);
     align-items: center;
     justify-content: center;
@@ -624,7 +622,7 @@ div.atajo-atajo > span.key {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(15, 23, 42, 0.8);
+    background-color: rgba(31, 44, 57, 0.8);
     backdrop-filter: blur(4px);
     align-items: center;
     justify-content: center;
@@ -684,7 +682,7 @@ div.atajo-atajo > span.key {
 .form-textarea:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+    box-shadow: 0 0 0 3px rgb(20 131 224 / 0.1);
 }
 
 .form-textarea {
@@ -777,7 +775,7 @@ div.atajo-atajo > span.key {
 }
 
 .pure-button-primary:hover {
-    background: linear-gradient(135deg, var(--primary-hover) 0%, #3730a3 100%);
+    background: linear-gradient(135deg, var(--primary-hover) 0%, #0f6bb8 100%);
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
     border-color: var(--primary-hover);
@@ -895,9 +893,7 @@ div.atajo-atajo > span.key {
     filter: none; /* El logo mantiene sus colores originales */
 }
 
-[data-theme="dark"] img[src*="checkbox-cross-red-icon"] {
-    filter: none; /* El icono rojo de eliminar mantiene su color */
-}
+
 
 /* Excepción: Botón configuración global NO se invierte en modo claro */
 #global-settings-id-btn img {
