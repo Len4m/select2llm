@@ -504,6 +504,8 @@ div.atajo-atajo > span.key {
     overflow: hidden;
     position: relative;
     animation: modalSlideIn 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-content.small {
@@ -528,6 +530,7 @@ div.atajo-atajo > span.key {
     padding: var(--space-xl) var(--space-xl) var(--space-lg) var(--space-xl);
     border-bottom: 1px solid var(--border);
     background: var(--surface);
+    flex: 0 0 auto;
 }
 
 .modal-title {
@@ -578,7 +581,8 @@ div.atajo-atajo > span.key {
 .modal-body {
     padding: var(--space-xl);
     overflow-y: auto;
-    max-height: calc(90vh - 140px);
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .modal-footer {
@@ -589,6 +593,7 @@ div.atajo-atajo > span.key {
     padding: var(--space-lg) var(--space-xl);
     border-top: 1px solid var(--border);
     background: var(--surface);
+    flex: 0 0 auto;
 }
 
 .modal-actions {

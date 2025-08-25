@@ -1,5 +1,5 @@
 // Import necessary modules from 'electron'
-const { clipboard, ipcRenderer } = require('electron');
+const { clipboard, ipcRenderer, webFrame } = require('electron');
 
 // Import logger (using dynamic import for ES module compatibility)
 let logger;
@@ -566,7 +566,18 @@ restartButton.addEventListener("click", restartApplication);
 
 // Función para actualizar el zoom de la página en tiempo real
 window.updateZoom = function(value) {
-    document.body.style.zoom = value + '%';
+    try {
+        if (webFrame && typeof webFrame.setZoomFactor === 'function') {
+            const factor = Math.max(0.25, Math.min(5, Number(value) / 100));
+            webFrame.setZoomFactor(factor);
+        } else {
+            // Fallback (no recomendado): CSS zoom si webFrame no está disponible
+            document.body.style.zoom = value + '%';
+        }
+    } catch (e) {
+        // Último recurso: aplicar CSS zoom si ocurre algún error
+        document.body.style.zoom = value + '%';
+    }
 };
 
 // Solicitar las constantes de UI al proceso principal
