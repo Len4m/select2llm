@@ -32,10 +32,10 @@ export function sendTextLinux(text) {
                 logger.debug('Preparando comando para enviar texto en X11', { line, wid });
                 if (line.length > 0) {
                     if (wid) {
-                        cmd = escapeForBash(['xdotool', 'type', '--clearmodifiers', '--window', wid, '--', line]);
+                        cmd = escapeForBash(['xdotool', 'type', '--delay', '1', '--clearmodifiers', '--window', wid, '--', line]);
                         logger.debug('Comando generado con wid', { cmd });
                     } else {
-                        cmd = escapeForBash(['xdotool', 'type', '--clearmodifiers', '--', line]);
+                        cmd = escapeForBash(['xdotool', 'type', '--delay 1','--clearmodifiers', '--', line]);
                         logger.debug('Comando generado sin wid', { cmd });
                     }
                 }
