@@ -29,14 +29,34 @@ export function sendTextLinux(text) {
 
             if (sessionType === 'x11') {
                 // En X11: usamos xdotool y el ID de la ventana (wid)
+                logger.debug('Preparando comando para enviar texto en X11', { line, wid });
                 if (line.length > 0) {
-                    cmd = escapeForBash(['xdotool', 'type', '--clearmodifiers', '--window', wid, '--', line]);
+                    if (wid) {
+                        cmd = escapeForBash(['xdotool', 'type', '--clearmodifiers', '--window', wid, '--', line]);
+                        logger.debug('Comando generado con wid', { cmd });
+                    } else {
+                        cmd = escapeForBash(['xdotool', 'type', '--clearmodifiers', '--', line]);
+                        logger.debug('Comando generado sin wid', { cmd });
+                    }
                 }
                 if (lines.length > 0) {
-                    if (line.length > 0)
-                        cmd += ` && xdotool key --clearmodifiers --window '${wid}' Return`;
-                    else
-                        cmd = `xdotool key --clearmodifiers --window '${wid}' Return`;
+                    if (line.length > 0) {
+                        if (wid) {
+                            cmd += ` && xdotool key --clearmodifiers --window '${wid}' Return`;
+                            logger.debug('Añadiendo enter con wid', { cmd });
+                        } else {
+                            cmd += ` && xdotool key --clearmodifiers Return`;
+                            logger.debug('Añadiendo enter sin wid', { cmd });
+                        }
+                    } else {
+                        if (wid) {
+                            cmd = `xdotool key --clearmodifiers --window '${wid}' Return`;
+                            logger.debug('Solo enter con wid', { cmd });
+                        } else {
+                            cmd = `xdotool key --clearmodifiers Return`;
+                            logger.debug('Solo enter sin wid', { cmd });
+                        }
+                    }
                 }
             } else if (sessionType === 'wayland') {
                 // En Wayland: usamos ydotool en lugar de wtype
