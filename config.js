@@ -131,6 +131,29 @@ function renderModels() {
 function renderShortcuts() {
     const list = document.getElementById('shortcuts-list');
     list.innerHTML = '';
+    
+    // Check if there are no shortcuts configured
+    if (shortcuts.length === 0) {
+        const emptyMessage = document.createElement('li');
+        emptyMessage.className = 'empty-shortcuts-message';
+        emptyMessage.innerHTML = `
+            <div class="empty-message-content">
+                <img src="images/hand-icon.png" alt="" class="empty-message-icon">
+                <h3 data-i18n="No hay atajos configurados">No hay atajos configurados</h3>
+                <p data-i18n="Haz click en el botón 'Añadir Nuevo Atajo' para crear tu primer atajo.">
+                    Haz click en el botón 'Añadir Nuevo Atajo' para crear tu primer atajo.
+                </p>
+            </div>
+        `;
+        list.appendChild(emptyMessage);
+        
+        // Request translations for the empty message
+        ipcRenderer.send('get-translation', 'No hay atajos configurados');
+        ipcRenderer.send('get-translation', 'Haz click en el botón \'Añadir Nuevo Atajo\' para crear tu primer atajo.');
+        
+        return;
+    }
+    
     shortcuts.forEach((shortcut, index) => {
         const item = document.getElementById('prompts-items').content.cloneNode(true);
         let atajoHtml = '';

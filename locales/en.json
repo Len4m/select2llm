@@ -38,5 +38,7 @@
   "Tema de Interfaz": "Interface Theme",
   "Claro": "Light",
   "Oscuro": "Dark",
-  "Selecciona el tema visual de la aplicación": "Select the visual theme of the application"
+  "Selecciona el tema visual de la aplicación": "Select the visual theme of the application",
+  "No hay atajos configurados": "No shortcuts configured",
+  "Haz click en el botón 'Añadir Nuevo Atajo' para crear tu primer atajo.": "Click the 'Add New Shortcut' button to create your first shortcut."
 }

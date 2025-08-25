@@ -114,7 +114,7 @@ h1 {
 }
 
 .logo {
-    max-width: 250px;
+    max-width: 200px;
 }
 
 .clearfix {
@@ -1023,12 +1023,19 @@ input[type="range"] {
     }
     
     .flex-container {
-        flex-direction: column;
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .flex-items:nth-child(1) {
+        flex: 1;
+        min-width: 0;
     }
     
     .flex-items:nth-child(2) {
-        text-align: left;
-        align-self: flex-start;
+        flex: 0 0 auto;
+        text-align: right;
+        align-self: center;
     }
     
     #global-config-form {
@@ -1084,4 +1091,62 @@ select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+}
+
+/* Empty shortcuts message styling */
+.empty-shortcuts-message {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-lg);
+    color: var(--text-muted);
+    box-shadow: none;
+    transform: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: var(--space-2xl) auto;
+    width: 100%;
+    position: relative;
+}
+
+.empty-shortcuts-message:hover {
+    box-shadow: none;
+    border-color: var(--border);
+    transform: none;
+}
+
+.empty-message-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.empty-message-icon {
+    width: 48px;
+    height: 48px;
+    opacity: 0.4;
+    filter: grayscale(100%);
+}
+
+[data-theme="dark"] .empty-message-icon {
+    filter: grayscale(100%) brightness(0) invert(1);
+    opacity: 0.6;
+}
+
+.empty-shortcuts-message h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.empty-shortcuts-message p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+    
 }
