@@ -11,8 +11,8 @@
   },
   "main": "main.js",
   "scripts": {
+    "dev": "NODE_ENV=development electronmon --trace-warnings .",
     "start": "electron .",
-    "start:dev": "NODE_ENV=development electron .",
     "build": "electron-builder",
     "rebuild": "electron-rebuild -f",
     "postinstall": "electron-rebuild -f || echo \"(no native modules)\"",
@@ -25,7 +25,8 @@
   },
   "devDependencies": {
     "electron": "^37.3.1",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "electronmon": "^2.0.3"
   },
   "build": {
     "asar": true,
