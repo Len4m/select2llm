@@ -245,6 +245,9 @@ export class ShortcutService {
             throw error;
             
         } finally {
+            // Limpiar modificadores pegados antes del callback de fin
+            platformService.clearStuckModifiers();
+            
             // Callback de fin si está definido
             if (this.stopCallback) {
                 await this.stopCallback(shortcut.overlay);

@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 import logger from './logger.js';
 
 // Importar controllers específicos de plataforma
-import { sendCopyLinux, sendTextLinux, getLinuxWindowGeometry } from '../controllers/linuxController.js';
+import { sendCopyLinux, sendTextLinux, getLinuxWindowGeometry, clearStuckModifiers } from '../controllers/linuxController.js';
 import { sendCopyWindows, sendTextWindows, getWindowsWindowGeometry } from '../controllers/windowsController.js';
 import { 
     sendCopyMac, 
@@ -190,6 +190,26 @@ export class PlatformService {
                 return getLinuxWindowGeometry();
             default:
                 return defaultGeometry;
+        }
+    }
+
+    /**
+     * Limpia modificadores pegados (especialmente útil en Linux X11)
+     */
+    clearStuckModifiers() {
+        logger.platformOperation('clearStuckModifiers', this.platform);
+
+        switch (this.platform) {
+            case 'linux':
+                clearStuckModifiers();
+                break;
+            case 'win32':
+            case 'darwin':
+                // En Windows y macOS normalmente no tenemos este problema
+                logger.debug('clearStuckModifiers not needed for this platform');
+                break;
+            default:
+                logger.warn('clearStuckModifiers not supported for platform', { platform: this.platform });
         }
     }
 

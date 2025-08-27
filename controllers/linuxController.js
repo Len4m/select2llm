@@ -4,6 +4,20 @@ import logger from '../services/logger.js';
 let wid;
 const sessionType = (process.env.XDG_SESSION_TYPE || '').toLowerCase(); // 'wayland' o 'x11'
 
+// Función para limpiar modificadores pegados en X11
+export function clearStuckModifiers() {
+    if (sessionType === 'x11' && wid) {
+        const clearCmd = `xdotool keyup --clearmodifiers --window '${wid}' ctrl shift alt`;
+        exec(clearCmd, (error) => {
+            if (error) {
+                logger.debug('Error clearing stuck modifiers', { error: error.message });
+            } else {
+                logger.debug('Stuck modifiers cleared successfully');
+            }
+        });
+    }
+}
+
 // Función para escapar caracteres especiales para bash (se usa con xdotool)
 function escapeForBash(args) {
     return args.map(s => {
@@ -21,6 +35,8 @@ export function sendTextLinux(text) {
 
         function typeLines(lines) {
             if (lines.length === 0) {
+                // Limpiar modificadores al finalizar el envío de texto
+                clearStuckModifiers();
                 resolve(); // Se procesaron todas las líneas
                 return;
             }
@@ -102,11 +118,13 @@ export async function sendCopyLinux() {
                 if (!wid) {
                     return reject(new Error('Ventana no encontrada'));
                 }
-                exec(`xdotool key --clearmodifiers --window '${wid}' ctrl+c`, (error2, stdout2, stderr2) => {
+                // Enviamos ctrl+c y luego limpiamos modificadores para evitar teclas pegadas
+                const copyCmd = `xdotool key --clearmodifiers --window '${wid}' ctrl+c && xdotool keyup --clearmodifiers --window '${wid}' ctrl shift alt`;
+                exec(copyCmd, (error2, stdout2, stderr2) => {
                     if (error2) {
                         return reject(new Error(`Error al copiar al portapapeles: ${error2}\n${stderr2}`));
                     }
-                    logger.debug('Ctrl+C sent via X11');
+                    logger.debug('Ctrl+C sent via X11 with modifier cleanup');
                     resolve();
                 });
             });
