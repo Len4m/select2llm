@@ -46,11 +46,15 @@ logger.info('Application starting', {
 function hideShowConfig() {
     try {
         if (configWindow.isVisible()) {
-            configWindow.hide();
-            logger.debug('Config window hidden');
+            if (!configWindow.isFocused()) {
+                configWindow.focus();
+                logger.debug('Config window focused');
+            } else {
+                configWindow.hide();
+                logger.debug('Config window hidden');
+            }
         } else {
             configWindow.show();
-            configWindow.focus();
             logger.debug('Config window shown');
         }
     } catch (error) {
