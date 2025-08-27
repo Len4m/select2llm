@@ -13,6 +13,11 @@ import i18n from './i18n.js';
 import { APP_CONFIG, TRAY_CONFIG, ANIMATION_CONFIG } from './constants/index.js';
 import { getTrayAnimationIcon, registerTrayForThemeUpdates } from './utils/iconHelper.js';
 
+
+// Enable usage of Portal's globalShortcuts. This is essential for cases when
+// the app runs in a Wayland session.
+app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal')
+
 // Only one instance
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -41,6 +46,8 @@ logger.info('Application starting', {
     platform: process.platform,
     nodeVersion: process.version
 });
+
+
 
 // Hide or show configuration window
 function hideShowConfig() {
