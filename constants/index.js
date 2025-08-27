@@ -3,6 +3,9 @@
  * Contiene todas las constantes de la aplicación para facilitar el mantenimiento
  */
 
+// ============================================================================
+// CONFIGURACIÓN PRINCIPAL DE LA APLICACIÓN
+// ============================================================================
 export const APP_CONFIG = {
     NAME: 'Select2LLM',
     ID: 'com.lenam.Select2llm',
@@ -18,6 +21,9 @@ export const APP_CONFIG = {
     }
 };
 
+// ============================================================================
+// CONFIGURACIÓN DE VENTANAS
+// ============================================================================
 export const WINDOW_CONFIG = {
     CONFIG: {
         WIDTH: 750,
@@ -42,6 +48,9 @@ export const WINDOW_CONFIG = {
     }
 };
 
+// ============================================================================
+// CONFIGURACIÓN DE OLLAMA
+// ============================================================================
 export const OLLAMA_CONFIG = {
     DEFAULT_HOST: 'http://127.0.0.1:11434',
     DEFAULT_MODEL: 'llama3.2:latest',
@@ -64,6 +73,9 @@ export const OLLAMA_CONFIG = {
     }
 };
 
+// ============================================================================
+// CONFIGURACIÓN DE PLATAFORMA
+// ============================================================================
 export const PLATFORM_CONFIG = {
     SUPPORTED: ['win32', 'linux', 'darwin'],
     
@@ -84,6 +96,9 @@ export const PLATFORM_CONFIG = {
     }
 };
 
+// ============================================================================
+// CONFIGURACIÓN DE SHORTCUTS
+// ============================================================================
 export const SHORTCUTS_CONFIG = {
     MODIFIERS: ['ctrl', 'shift', 'alt'],
     
@@ -103,48 +118,9 @@ export const SHORTCUTS_CONFIG = {
     }
 };
 
-export const LOGGING_CONFIG = {
-    LEVELS: {
-        ERROR: 0,
-        WARN: 1,
-        INFO: 2,
-        DEBUG: 3
-    },
-    
-    DEFAULT_LEVEL: 'INFO',
-    DEVELOPMENT_LEVEL: 'DEBUG',
-    
-    // Configuración de archivos de log
-    FILE_CONFIG: {
-        MAX_SIZE: 10 * 1024 * 1024, // 10MB
-        MAX_FILES: 5,
-        DATE_PATTERN: 'YYYY-MM-DD',
-        EXTENSION: '.log'
-    },
-    
-    // Colores para consola
-    COLORS: {
-        ERROR: '\x1b[31m',  // Rojo
-        WARN: '\x1b[33m',   // Amarillo
-        INFO: '\x1b[36m',   // Cian
-        DEBUG: '\x1b[37m',  // Blanco
-        RESET: '\x1b[0m'
-    }
-};
-
-export const I18N_CONFIG = {
-    DEFAULT_LANGUAGE: 'en',
-    SUPPORTED_LANGUAGES: ['en', 'es', 'ca'],
-    LOCALES_DIR: 'locales',
-    
-    // Mapeo de locales del sistema
-    LOCALE_MAPPING: {
-        'ca': ['ca_ES', 'ca_AD', 'ca_FR', 'ca_IT'],
-        'es': ['es_ES', 'es_MX', 'es_AR', 'es_CO', 'es_CL', 'es_PE', 'es_VE'],
-        'en': ['en_US', 'en_GB', 'en_CA', 'en_AU']
-    }
-};
-
+// ============================================================================
+// CÓDIGOS DE ERROR
+// ============================================================================
 export const ERROR_CODES = {
     // Errores de configuración
     CONFIG_NOT_FOUND: 'CONFIG_NOT_FOUND',
@@ -173,42 +149,53 @@ export const ERROR_CODES = {
     FILE_CORRUPTED: 'FILE_CORRUPTED'
 };
 
+// ============================================================================
+// CONFIGURACIÓN DE ANIMACIÓN
+// ============================================================================
 export const ANIMATION_CONFIG = {
-    FRAMES: 20,
-    FRAME_DELAY: 100, // milliseconds
-    FRAME_PATTERN: 'frame_{index}_delay-0.06s.png',
-    ANIMATION_DIR: 'images/animation'
+    FRAME_DELAY: 500, // milliseconds
+    ANIMATION_DIR: 'images/animation',
+    FRAMES: 3 // Total available frames (0, 1, 2)
 };
 
+// ============================================================================
+// CONFIGURACIÓN DEL TRAY
+// ============================================================================
 export const TRAY_CONFIG = {
     TOOLTIP: 'Select2LLM',
     CLICK_TIMEOUT: 300 // milliseconds for double-click detection
 };
 
+// ============================================================================
+// CONFIGURACIÓN DEL PORTAPAPELES
+// ============================================================================
 export const CLIPBOARD_CONFIG = {
     MAX_SIZE: 1024 * 1024, // 1MB
     ENCODING: 'utf-8',
     TIMEOUT: 5000 // milliseconds
 };
 
+// ============================================================================
+// CONFIGURACIÓN DE LA INTERFAZ DE USUARIO
+// ============================================================================
 export const UI_CONFIG = {
     ZOOM: {
         MIN: 100,        // Zoom mínimo 100%
-        MAX: 150,       // Zoom máximo 150%
-        DEFAULT: 100,   // Zoom por defecto 100%
-        STEP: 1        // Incrementos de 1%
+        MAX: 150,        // Zoom máximo 150%
+        DEFAULT: 100,    // Zoom por defecto 100%
+        STEP: 1          // Incrementos de 1%
     }
 };
 
-// Exportar todo como un objeto para importación selectiva
+// ============================================================================
+// EXPORTACIÓN PRINCIPAL
+// ============================================================================
 export default {
     APP_CONFIG,
     WINDOW_CONFIG,
     OLLAMA_CONFIG,
     PLATFORM_CONFIG,
     SHORTCUTS_CONFIG,
-    LOGGING_CONFIG,
-    I18N_CONFIG,
     ERROR_CODES,
     ANIMATION_CONFIG,
     TRAY_CONFIG,

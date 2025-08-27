@@ -69,7 +69,7 @@ function applyTheme(theme) {
     setTimeout(() => {
         const logoElement = document.querySelector('.logo');
         if (logoElement) {
-            const newLogoSrc = theme === 'dark' ? 'images/logo-oscuro.png' : 'images/logo-claro.png';
+            const newLogoSrc = theme === 'dark' ? 'images/logo-oscuro.svg' : 'images/logo-claro.svg';
             console.log('Updating logo to:', newLogoSrc); // Debug log
             logoElement.src = newLogoSrc;
         } else {
@@ -77,7 +77,7 @@ function applyTheme(theme) {
             setTimeout(() => {
                 const retryLogoElement = document.querySelector('.logo');
                 if (retryLogoElement) {
-                    const newLogoSrc = theme === 'dark' ? 'images/logo-oscuro.png' : 'images/logo-claro.png';
+                    const newLogoSrc = theme === 'dark' ? 'images/logo-oscuro.svg' : 'images/logo-claro.svg';
                     console.log('Retry updating logo to:', newLogoSrc); // Debug log
                     retryLogoElement.src = newLogoSrc;
                 }

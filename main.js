@@ -1,4 +1,4 @@
-import { app, globalShortcut, Tray, Menu, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, globalShortcut, Tray, Menu, BrowserWindow, ipcMain, shell, nativeImage, nativeTheme } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createConfigWindow } from './windows/configWindow.js';
@@ -82,9 +82,19 @@ function removeTransparentWindow() {
 }
 
 // Function to get the path of the current icon
-function getIconPath(index) {
-    const indexString = index < 10 ? `0${index}` : `${index}`;
-    return path.join(__dirname, `${ANIMATION_CONFIG.ANIMATION_DIR}/frame_${indexString}_delay-0.06s.png`);
+function getNativeImageTryIcon(index) {
+    // Detect system theme
+    const isDarkMode = nativeTheme.shouldUseDarkColors;
+    const themeFolder = isDarkMode ? 'dark' : 'light';
+    
+    // Only use frames 0, 1, 2 (static, animation frame 1, animation frame 2)
+    const clampedIndex = Math.min(index, ANIMATION_CONFIG.FRAMES - 1);
+    const indexString = `${clampedIndex}`;
+
+    const icon = nativeImage.createFromPath(
+         path.join(__dirname, `${ANIMATION_CONFIG.ANIMATION_DIR}/${themeFolder}/frame_${indexString}.png`)
+    )
+    return icon;
 }
 
 // Start inference process
@@ -94,9 +104,14 @@ async function startInference(overlay = true) {
         
         if (animationInterval) clearInterval(animationInterval);
         
+        // Start animation with frame 1
+        iconIndex = 1;
+        tray.setImage(getNativeImageTryIcon(iconIndex));
+        
         animationInterval = setInterval(() => {
-            iconIndex = ((iconIndex + 1) % ANIMATION_CONFIG.FRAMES);
-            tray.setImage(getIconPath(iconIndex));
+            // Alternate between frames 1 and 2 for animation
+            iconIndex = iconIndex === 1 ? 2 : 1;
+            tray.setImage(getNativeImageTryIcon(iconIndex));
         }, ANIMATION_CONFIG.FRAME_DELAY);
         
         // Create overlay window if requested
@@ -128,7 +143,8 @@ async function stopInference(overlay = true) {
             animationInterval = null;
         }
         
-        tray.setImage(getIconPath(0));
+        tray.setImage(getNativeImageTryIcon(0));
+        iconIndex = 0; // Reset to static frame
         
         if (overlay) {
             removeTransparentWindow();
@@ -155,7 +171,7 @@ function updateTrayMenu() {
             click: () => {
                 try {
                     ollamaService.cancel();
-                    removeTransparentWindow();
+                    stopInference(false); // Stop animation without overlay
                 } catch (error) {
                     logger.error('Error cancelling from tray', { error: error.message });
                 }
@@ -206,7 +222,7 @@ ipcMain.on('cancelar-proceso', () => {
     try {
         logger.info('Cancel process requested from frontend');
         ollamaService.cancel();
-        removeTransparentWindow();
+        stopInference(false); // Stop animation without overlay
     } catch (error) {
         logger.error('Error cancelling process', { error: error.message });
     }
@@ -305,7 +321,7 @@ app.whenReady().then(async () => {
         logger.info('Ollama availability check completed', { available: ollamaIsOk });
 
         // Create tray icon
-        tray = new Tray(getIconPath(0));
+        tray = new Tray(getNativeImageTryIcon(0));
         logger.debug('Tray icon created');
 
         // Create initial tray menu
@@ -341,7 +357,7 @@ app.whenReady().then(async () => {
                         // Double click - cancel
                         logger.debug('Tray double-click detected');
                         ollamaService.cancel();
-                        removeTransparentWindow();
+                        stopInference(false); // Stop animation without overlay
                     } else {
                         // Single click - toggle config
                         logger.debug('Tray single-click detected');
