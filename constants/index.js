@@ -20,9 +20,9 @@ export const APP_CONFIG = {
 
 export const WINDOW_CONFIG = {
     CONFIG: {
-        WIDTH: 660,
+        WIDTH: 750,
         HEIGHT: 475,
-        MIN_WIDTH: 660,
+        MIN_WIDTH: 750,
         MIN_HEIGHT: 475
     },
     
