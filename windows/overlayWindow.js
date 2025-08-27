@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import logger from '../services/logger.js';
 import { WINDOW_CONFIG } from '../constants/index.js';
+import { getAppIcon, registerWindowForThemeUpdates } from '../utils/iconHelper.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,7 +36,7 @@ export async function createOverlayWindow(obj) {
                 modal: true,
                 parent: BrowserWindow.getFocusedWindow(),
                 menu: null,
-                icon: path.join(__dirname, '../images/icon-transparent.png'),
+                icon: getAppIcon(),
                 webPreferences: {
                     nodeIntegration: true,
                     contextIsolation: false,
@@ -43,6 +44,9 @@ export async function createOverlayWindow(obj) {
             }
 
             const win = new BrowserWindow(windowOptions);
+
+            // Registrar la ventana para actualizaciones automáticas de tema
+            registerWindowForThemeUpdates(win);
 
             if (process.platform === "win32") {
                 win.removeMenu();

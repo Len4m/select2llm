@@ -11,6 +11,7 @@ import platformService from './services/platformService.js';
 import errorService from './services/errorService.js';
 import i18n from './i18n.js';
 import { APP_CONFIG, TRAY_CONFIG, ANIMATION_CONFIG } from './constants/index.js';
+import { getTrayAnimationIcon, registerTrayForThemeUpdates } from './utils/iconHelper.js';
 
 // Only one instance
 const gotTheLock = app.requestSingleInstanceLock();
@@ -83,18 +84,19 @@ function removeTransparentWindow() {
 
 // Function to get the path of the current icon
 function getNativeImageTryIcon(index) {
-    // Detect system theme
-    const isDarkMode = nativeTheme.shouldUseDarkColors;
-    const themeFolder = isDarkMode ? 'dark' : 'light';
-    
-    // Only use frames 0, 1, 2 (static, animation frame 1, animation frame 2)
-    const clampedIndex = Math.min(index, ANIMATION_CONFIG.FRAMES - 1);
-    const indexString = `${clampedIndex}`;
+    const iconPath = getTrayAnimationIcon(index);
+    return nativeImage.createFromPath(iconPath);
+}
 
-    const icon = nativeImage.createFromPath(
-         path.join(__dirname, `${ANIMATION_CONFIG.ANIMATION_DIR}/${themeFolder}/frame_${indexString}.png`)
-    )
-    return icon;
+// Function to update tray icon when theme changes
+function updateTrayForTheme() {
+    if (tray) {
+        // Update the tray icon to reflect current state and theme
+        const currentIcon = isInferenceActive ? 
+            (iconIndex === 1 ? getNativeImageTryIcon(1) : getNativeImageTryIcon(2)) : 
+            getNativeImageTryIcon(0);
+        tray.setImage(currentIcon);
+    }
 }
 
 // Start inference process
@@ -323,6 +325,9 @@ app.whenReady().then(async () => {
         // Create tray icon
         tray = new Tray(getNativeImageTryIcon(0));
         logger.debug('Tray icon created');
+
+        // Register tray for theme updates
+        registerTrayForThemeUpdates(tray, updateTrayForTheme);
 
         // Create initial tray menu
         updateTrayMenu();
