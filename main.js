@@ -15,6 +15,7 @@ import { getTrayAnimationIcon, registerTrayForThemeUpdates } from './utils/iconH
 
 // Enable GlobalShortcutsPortal for Wayland
 app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal')
+app.commandLine.appendSwitch('disable-gpu-sandbox');
 
 const platformInfo = platformService.getPlatformInfo();
 
