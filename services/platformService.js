@@ -15,6 +15,7 @@ import {
     sendTextLinux, 
     getLinuxWindowGeometry, 
     clearStuckModifiers, 
+    flushPendingLinux,
     checkWaylandPortals,
     detectLinuxDisplayServer,
     applyWaylandElectronFlags,
@@ -289,6 +290,15 @@ export class PlatformService {
                 break;
             default:
                 logger.warn('clearStuckModifiers not supported for platform', { platform: this.platform });
+        }
+    }
+
+    /**
+     * Flush pendiente para Linux (Wayland)
+     */
+    flushPending() {
+        if (this.platform === 'linux') {
+            try { flushPendingLinux(); } catch {}
         }
     }
 

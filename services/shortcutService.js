@@ -19,6 +19,7 @@ export class ShortcutService {
         this.registeredShortcuts = new Map();
         this.startCallback = null;
         this.stopCallback = null;
+        this.lastTriggerAt = 0;
     }
 
     /**
@@ -173,6 +174,14 @@ export class ShortcutService {
             logger.info('Shortcut triggered', { combination });
             
             try {
+                // Debounce anti-doble-disparo
+                const now = Date.now();
+                if (now - this.lastTriggerAt < SHORTCUTS_CONFIG.DELAYS.TRIGGER_DEBOUNCE_MS) {
+                    logger.warn('Shortcut ignored due to debounce window', { combination });
+                    return;
+                }
+                this.lastTriggerAt = now;
+
                 // Verificar si ya hay un procesamiento en curso
                 if (ollamaService.isCurrentlyProcessing()) {
                     logger.warn('Already processing, ignoring shortcut', { combination });
@@ -207,18 +216,39 @@ export class ShortcutService {
             // Delay inicial
             await delay(SHORTCUTS_CONFIG.DELAYS.BEFORE_COPY);
             
+            // Leer portapapeles previo para fallback
+            let previousClipboard = '';
+            try {
+                previousClipboard = (await clipboard.read()) || '';
+            } catch {}
+
             // Enviar comando de copia
             await platformService.sendCopyCommand();
             await delay(SHORTCUTS_CONFIG.DELAYS.AFTER_COPY);
             
             // Obtener texto del portapapeles
-            const selectedText = await this.getSelectedText();
+            let selectedText;
+            try {
+                selectedText = await this.getSelectedText();
+            } catch (error) {
+                logger.debug('Failed to get clipboard content, will use prompt only', { error: error.message });
+                selectedText = '';
+            }
+            
             await delay(SHORTCUTS_CONFIG.DELAYS.BEFORE_PROCESS);
             
-            // Validar que hay texto seleccionado
+            // Si no hay texto seleccionado, usar solo el prompt
             if (!selectedText || selectedText.trim().length === 0) {
-                logger.warn('No text selected', { shortcut: shortcut.key });
-                return;
+                // Fallback: usar último contenido del portapapeles si existe
+                const fallback = (previousClipboard || '').trim();
+                // Solo usar fallback si cambió respecto al actual (evitar usar el mismo de antes si no se copió nada nuevo)
+                if (fallback.length > 0 && fallback !== selectedText) {
+                    logger.info('No selection detected, using previous clipboard as fallback');
+                    selectedText = fallback;
+                } else {
+                    logger.info('No text selected, using prompt only', { shortcut: shortcut.key });
+                    selectedText = '';
+                }
             }
 
             // Callback de inicio si está definido
@@ -226,7 +256,7 @@ export class ShortcutService {
                 await this.startCallback(shortcut.overlay);
             }
             
-            // Formar el mensaje a partir del prompt
+            // Formar el mensaje a partir del prompt (con o sin texto seleccionado)
             const message = this.buildPromptMessage(shortcut.prompt, selectedText);
             
             logger.info('Executing shortcut', {
@@ -249,6 +279,9 @@ export class ShortcutService {
         } finally {
             // Limpiar modificadores pegados antes del callback de fin
             platformService.clearStuckModifiers();
+            // Pequeño retraso y segunda pasada por robustez
+            await new Promise(r => setTimeout(r, 20));
+            platformService.clearStuckModifiers();
             
             // Callback de fin si está definido
             if (this.stopCallback) {
@@ -264,6 +297,10 @@ export class ShortcutService {
         if (prompt.includes('%s')) {
             return prompt.replace('%s', selectedText);
         } else {
+            // Si no hay texto seleccionado, usar solo el prompt sin espacios adicionales
+            if (!selectedText || selectedText.trim().length === 0) {
+                return prompt;
+            }
             return `${prompt} ${selectedText}`;
         }
     }

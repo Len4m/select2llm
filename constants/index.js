@@ -114,7 +114,8 @@ export const SHORTCUTS_CONFIG = {
     DELAYS: {
         BEFORE_COPY: 250,
         AFTER_COPY: 250,
-        BEFORE_PROCESS: 250
+        BEFORE_PROCESS: 250,
+        TRIGGER_DEBOUNCE_MS: 800
     }
 };
 
@@ -176,6 +177,35 @@ export const CLIPBOARD_CONFIG = {
 };
 
 // ============================================================================
+// CONFIGURACIÓN DE STREAMING DE TEXTO (SIMPLIFICADA)
+// ============================================================================
+export const TEXT_STREAMING_CONFIG = {
+    // Configuración por defecto - ROBUSTA ANTI-CORRUPCIÓN
+    DEFAULT: {
+        MIN_CHUNK_SIZE: 12,         // Lo suficientemente grande para evitar corrupción
+        MAX_WAIT_TIME: 400          // Tiempo razonable
+    },
+    
+    // Configuración especializada para modelos de código
+    CODE_MODELS: {
+        MIN_CHUNK_SIZE: 15,         // Seguro para código
+        MAX_WAIT_TIME: 500          // Más tiempo para código
+    },
+    
+    // Configuración para modelos de chat/conversación
+    CHAT_MODELS: {
+        MIN_CHUNK_SIZE: 10,         // Conservador pero fluido
+        MAX_WAIT_TIME: 300          // Relativamente rápido
+    },
+    
+    // Palabras clave para detectar tipos de modelos
+    MODEL_DETECTION: {
+        CODE_KEYWORDS: ['code', 'coder', 'coding', 'developer', 'dev'],
+        CHAT_KEYWORDS: ['chat', 'assistant', 'conversation', 'llama', 'gemma']
+    }
+};
+
+// ============================================================================
 // CONFIGURACIÓN DE LA INTERFAZ DE USUARIO
 // ============================================================================
 export const UI_CONFIG = {
@@ -200,5 +230,6 @@ export default {
     ANIMATION_CONFIG,
     TRAY_CONFIG,
     CLIPBOARD_CONFIG,
+    TEXT_STREAMING_CONFIG,
     UI_CONFIG
 };

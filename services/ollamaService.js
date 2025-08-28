@@ -9,7 +9,140 @@ import logger from './logger.js';
 import errorService from './errorService.js';
 import configService from './configService.js';
 import platformService from './platformService.js';
-import { OLLAMA_CONFIG, ERROR_CODES } from '../constants/index.js';
+import { OLLAMA_CONFIG, ERROR_CODES, TEXT_STREAMING_CONFIG } from '../constants/index.js';
+
+/**
+ * Manager para controlar el flujo de streaming de texto de manera inteligente
+ */
+class TextStreamManager {
+    constructor(options = {}) {
+        // Usar configuración de constantes como base
+        const baseConfig = TEXT_STREAMING_CONFIG.DEFAULT;
+        
+        this.minChunkSize = options.minChunkSize || baseConfig.MIN_CHUNK_SIZE;
+        this.maxWaitTime = options.maxWaitTime || baseConfig.MAX_WAIT_TIME;
+        
+        this.lastSendTime = Date.now();
+        this.totalCharsSent = 0;
+        
+        logger.debug('TextStreamManager initialized', {
+            minChunkSize: this.minChunkSize,
+            maxWaitTime: this.maxWaitTime
+        });
+    }
+
+    /**
+     * Determina si un chunk de texto debe ser enviado ahora - VERSIÓN ROBUSTA ANTI-CORRUPCIÓN
+     * @param {string} content - Contenido a evaluar
+     * @param {boolean} isLast - Si es el último chunk del stream
+     * @returns {boolean} - Si debe enviar el contenido
+     */
+    shouldSendChunk(content, isLast = false) {
+        if (!content || content.length === 0) {
+            return false;
+        }
+
+        // Siempre enviar el último chunk
+        if (isLast) {
+            return true;
+        }
+
+        const timeSinceLastSend = Date.now() - this.lastSendTime;
+        
+        // ESTRATEGIA ANTI-CORRUPCIÓN:
+        
+        // 1. NUNCA enviar chunks muy pequeños (causan corrupción)
+        if (content.length < 8) {
+            return false;
+        }
+        
+        // 2. VERIFICAR que no cortemos caracteres UTF-8 
+        if (this.hasIncompleteUTF8(content)) {
+            return false;
+        }
+        
+        // 3. BUSCAR puntos de ruptura SEGUROS (espacios después de palabras completas)
+        if (content.length >= this.minChunkSize && /[a-zA-ZáéíóúàèìòùäëïöüâêîôûçñÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÇÑ]\s+$/.test(content)) {
+            return true;
+        }
+        
+        // 4. BUSCAR puntuación natural SEGURA
+        if (content.length >= this.minChunkSize && /[.!?¡¿]\s*$/.test(content)) {
+            return true;
+        }
+        
+        // 5. Si lleva esperando demasiado tiempo: ENVIAR (pero con verificación de seguridad)
+        if (timeSinceLastSend >= this.maxWaitTime) {
+            // Solo si termina en un punto seguro o es muy largo
+            if (/\s$/.test(content) || content.length >= this.minChunkSize * 2) {
+                return true;
+            }
+        }
+        
+        // 6. TIMEOUT ABSOLUTO: Si llevamos demasiado tiempo, enviar
+        if (timeSinceLastSend >= this.maxWaitTime * 3) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Verifica si el texto tiene caracteres UTF-8 incompletos al final
+     * @param {string} content - Contenido a verificar
+     * @returns {boolean} - True si hay caracteres incompletos
+     */
+    hasIncompleteUTF8(content) {
+        if (!content || content.length === 0) return false;
+        
+        // Verificar si termina en medio de una palabra con acento
+        if (/[áéíóúàèìòùäëïöüâêîôûçñÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÇÑ]$/.test(content) && !/\s/.test(content.slice(-2))) {
+            return true;
+        }
+        
+        // Verificar secuencias de bytes UTF-8 incompletas
+        const lastChar = content.charAt(content.length - 1);
+        const lastCharCode = lastChar.charCodeAt(0);
+        
+        // Verificar surrogates UTF-16 (caracteres multi-byte incompletos)
+        if (lastCharCode >= 0xD800 && lastCharCode <= 0xDFFF) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Verifica si el texto contiene caracteres acentuados incompletos
+     * @param {string} content - Contenido a verificar
+     * @returns {boolean} - True si hay caracteres incompletos
+     */
+    hasIncompleteAccentedChars(content) {
+        // No enviar si termina con una letra acentuada seguida de caracteres especiales
+        // Esto evita cortar en medio de palabras como "acompañ" + "ado"
+        return /[áéíóúàèìòùäëïöüâêîôûçñÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÇÑ](?:[^a-zA-ZáéíóúàèìòùäëïöüâêîôûçñÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÇÑ\s]|$)/.test(content);
+    }
+
+    /**
+     * Registra que se ha enviado un chunk
+     * @param {number} charsCount - Número de caracteres enviados
+     */
+    onChunkSent(charsCount) {
+        this.lastSendTime = Date.now();
+        this.totalCharsSent += charsCount;
+    }
+
+    /**
+     * Obtiene estadísticas del stream
+     * @returns {Object} Estadísticas
+     */
+    getStats() {
+        return {
+            totalCharsSent: this.totalCharsSent,
+            lastSendTime: this.lastSendTime
+        };
+    }
+}
 
 export class OllamaService {
     constructor() {
@@ -171,6 +304,60 @@ export class OllamaService {
     }
 
     /**
+     * Crea un manager para controlar el flujo de streaming de texto
+     * Detecta automáticamente el tipo de modelo y aplica la configuración apropiada
+     * @returns {TextStreamManager} Manager de streaming de texto
+     */
+    createTextStreamManager() {
+        const currentModel = configService.get('model', OLLAMA_CONFIG.DEFAULT_MODEL).toLowerCase();
+        
+        // Detectar tipo de modelo usando las constantes
+        const modelType = this.detectModelType(currentModel);
+        
+        // Seleccionar configuración apropiada
+        let config;
+        switch (modelType) {
+            case 'code':
+                config = TEXT_STREAMING_CONFIG.CODE_MODELS;
+                logger.debug('Using CODE_MODELS configuration for streaming');
+                break;
+            case 'chat':
+                config = TEXT_STREAMING_CONFIG.CHAT_MODELS;
+                logger.debug('Using CHAT_MODELS configuration for streaming');
+                break;
+            default:
+                config = TEXT_STREAMING_CONFIG.DEFAULT;
+                logger.debug('Using DEFAULT configuration for streaming');
+        }
+        
+        return new TextStreamManager({
+            minChunkSize: config.MIN_CHUNK_SIZE,
+            maxWaitTime: config.MAX_WAIT_TIME
+        });
+    }
+
+    /**
+     * Detecta el tipo de modelo basado en el nombre
+     * @param {string} modelName - Nombre del modelo en minúsculas
+     * @returns {string} Tipo de modelo: 'code', 'chat', o 'default'
+     */
+    detectModelType(modelName) {
+        const { CODE_KEYWORDS, CHAT_KEYWORDS } = TEXT_STREAMING_CONFIG.MODEL_DETECTION;
+        
+        // Verificar si es un modelo de código
+        if (CODE_KEYWORDS.some(keyword => modelName.includes(keyword))) {
+            return 'code';
+        }
+        
+        // Verificar si es un modelo de chat
+        if (CHAT_KEYWORDS.some(keyword => modelName.includes(keyword))) {
+            return 'chat';
+        }
+        
+        return 'default';
+    }
+
+    /**
      * Valida los parámetros de la petición
      */
     validateRequestParams(prompt, model, temperature) {
@@ -247,6 +434,8 @@ export class OllamaService {
 
             let accumulatedText = '';
             let lastSentIndex = 0;
+            
+            const textStreamManager = this.createTextStreamManager();
 
             for await (const part of response) {
                 if (!this.isProcessing) {
@@ -259,10 +448,29 @@ export class OllamaService {
                 // Procesar texto de forma segura
                 const result = this.processSafeText(accumulatedText, lastSentIndex);
                 
-                // Enviar solo el contenido seguro
+                // Usar el manager para decidir cuándo enviar texto
                 if (result.safeContent) {
-                    await platformService.sendText(result.safeContent);
-                    lastSentIndex = result.newSentIndex;
+                    const shouldSend = textStreamManager.shouldSendChunk(
+                        result.safeContent, 
+                        part.done || false
+                    );
+                    
+                    if (shouldSend) {
+                        logger.debug('Sending text chunk', {
+                            length: result.safeContent.length,
+                            preview: result.safeContent.substring(0, 20) + '...',
+                            hasAccents: /[áéíóúàèìòùäëïöüâêîôûçñÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÇÑ]/.test(result.safeContent)
+                        });
+                        
+                        await platformService.sendText(result.safeContent);
+                        lastSentIndex = result.newSentIndex;
+                        textStreamManager.onChunkSent(result.safeContent.length);
+                    } else {
+                        logger.debug('Holding text chunk', {
+                            length: result.safeContent.length,
+                            reason: 'waiting for better breakpoint'
+                        });
+                    }
                 }
             }
             
@@ -270,9 +478,15 @@ export class OllamaService {
             if (this.isProcessing && accumulatedText) {
                 const finalFiltered = accumulatedText.replace(/<think>[\s\S]*?<\/think>/gi, '');
                 const finalContent = finalFiltered.slice(lastSentIndex);
-                if (finalContent) {
+                if (finalContent && finalContent.trim()) {
+                    logger.debug('Sending final content chunk', {
+                        length: finalContent.length,
+                        preview: finalContent.substring(0, 50) + '...'
+                    });
                     await platformService.sendText(finalContent);
                 }
+                // Forzar flush pendiente (Wayland)
+                try { platformService.flushPending(); } catch {}
             }
 
             logger.info('Text generation completed', { 
