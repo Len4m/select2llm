@@ -3,7 +3,7 @@
   "name": "select2llm",
   "homepage": "https://github.com/Len4m/select2llm",
   "version": "1.0.0",
-  "description": "Select text to LLM",
+  "description": "Tool to process selected text from any application using LLMs in Ollama with keyboard shortcuts",
   "author": {
     "name": "Lenam",
     "email": "lenamgenx@protonmail.com",

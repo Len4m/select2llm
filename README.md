@@ -7,7 +7,7 @@
 ## Features
 
 - **Send selected text with a shortcut** to your preferred Ollama model.
-- **Multiple shortcuts and prompts** to cover different workflows.
+- **Multiple shortcuts and prompts** configured by the user to cover different workflows.
 - **Simple in‑app settings** (language, temperature, UI zoom, etc.).
 - **Model list** shown in alphabetical order.
 - **Thinking filter** for reasoning models (shows only the final answer).
