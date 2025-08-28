@@ -16,7 +16,7 @@ export class Logger {
             DEBUG: 3
         };
 
-        this.currentLevel = this.levels.INFO;
+        this.currentLevel = this.levels.WARN;
         this.logDir = path.join(os.homedir(), '.select2llm', 'logs');
         this.ensureLogDir();
     }
