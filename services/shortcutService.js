@@ -265,9 +265,11 @@ export class ShortcutService {
                 temperature: shortcut.temperature,
                 overlay: shortcut.overlay
             });
-            
+            platformService.clearStuckModifiers();
             // Llamar a Ollama para procesar el mensaje
             await ollamaService.generateText(message, shortcut.model, shortcut.temperature);
+
+            
             
         } catch (error) {
             logger.error('Error executing shortcut', {
@@ -277,12 +279,6 @@ export class ShortcutService {
             throw error;
             
         } finally {
-            // Limpiar modificadores pegados antes del callback de fin
-            platformService.clearStuckModifiers();
-            // Pequeño retraso y segunda pasada por robustez
-            await new Promise(r => setTimeout(r, 20));
-            platformService.clearStuckModifiers();
-            
             // Callback de fin si está definido
             if (this.stopCallback) {
                 await this.stopCallback(shortcut.overlay);

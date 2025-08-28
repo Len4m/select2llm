@@ -13,17 +13,10 @@ import i18n from './i18n.js';
 import { APP_CONFIG, TRAY_CONFIG, ANIMATION_CONFIG } from './constants/index.js';
 import { getTrayAnimationIcon, registerTrayForThemeUpdates } from './utils/iconHelper.js';
 
+// Enable GlobalShortcutsPortal for Wayland
+app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal')
 
-// Configure platform-specific settings for Linux environments
 const platformInfo = platformService.getPlatformInfo();
-
-// Apply Wayland-specific Electron flags if needed
-if (platformInfo.isWayland) {
-    platformService.applyWaylandElectronFlags(app);
-}
-
-// Provide environment diagnosis for Linux
-platformService.logWaylandEnvironmentDiagnosis();
 
 // Only one instance
 const gotTheLock = app.requestSingleInstanceLock();

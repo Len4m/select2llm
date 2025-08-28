@@ -14,12 +14,8 @@ import {
     sendCopyLinux, 
     sendTextLinux, 
     getLinuxWindowGeometry, 
-    clearStuckModifiers, 
-    flushPendingLinux,
-    checkWaylandPortals,
-    detectLinuxDisplayServer,
-    applyWaylandElectronFlags,
-    logWaylandEnvironmentDiagnosis
+    clearLinuxStuckModifiers, 
+    detectLinuxDisplayServer
 } from '../controllers/linuxController.js';
 import { sendCopyWindows, sendTextWindows, getWindowsWindowGeometry } from '../controllers/windowsController.js';
 import { 
@@ -281,7 +277,7 @@ export class PlatformService {
 
         switch (this.platform) {
             case 'linux':
-                clearStuckModifiers();
+                clearLinuxStuckModifiers();
                 break;
             case 'win32':
             case 'darwin':
@@ -293,14 +289,6 @@ export class PlatformService {
         }
     }
 
-    /**
-     * Flush pendiente para Linux (Wayland)
-     */
-    flushPending() {
-        if (this.platform === 'linux') {
-            try { flushPendingLinux(); } catch {}
-        }
-    }
 
     // === INHERITED UTILITY METHODS ===
     // Platform-specific methods are now handled in dedicated controllers
@@ -348,34 +336,9 @@ export class PlatformService {
     }
 
     // === LINUX-SPECIFIC METHODS ===
+    // These methods are now greatly simplified or removed.
+    // The simplified linuxController does not require these complex helpers anymore.
 
-    /**
-     * Checks Wayland portals availability for global shortcuts support (Linux Wayland only)
-     */
-    async checkWaylandPortals() {
-        if (this.platform !== 'linux') {
-            throw new Error('checkWaylandPortals is only available on Linux');
-        }
-        if (this.sessionType !== 'wayland') {
-            logger.warn('checkWaylandPortals called on non-Wayland session', { sessionType: this.sessionType });
-            return null;
-        }
-        return checkWaylandPortals(this);
-    }
-
-    /**
-     * Applies Wayland-specific configurations for Electron (Linux Wayland only)
-     */
-    applyWaylandElectronFlags(app) {
-        return applyWaylandElectronFlags(app, this.sessionType);
-    }
-
-    /**
-     * Provides Wayland environment diagnosis (Linux Wayland only)
-     */
-    logWaylandEnvironmentDiagnosis() {
-        return logWaylandEnvironmentDiagnosis(this.getPlatformInfo());
-    }
 }
 
 // Instancia singleton del servicio de plataforma
