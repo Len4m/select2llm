@@ -33,7 +33,7 @@
   "Editar Atajo": "Edit Shortcut",
   "Combinación de teclas": "Key Combination",
   "Prompt": "Prompt",
-  "El texto seleccionado se añadirá al final del prompt": "Selected text will be added at the end of the prompt",
+  "El texto seleccionado se añadirá al final del prompt": "Use %s to insert the selected text; otherwise it will be added at the end of the prompt",
   "Mostrar una ventana superpuesta mientras se genera la respuesta": "Show an overlay window while generating the response",
   "Tema de Interfaz": "Interface Theme",
   "Claro": "Light",
