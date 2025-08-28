@@ -40,5 +40,6 @@
   "Oscuro": "Fosc",
   "Selecciona el tema visual de la aplicación": "Selecciona el tema visual de l'aplicació",
   "No hay atajos configurados": "No hi ha dreceres configurades",
-  "Haz click en el botón 'Añadir Nuevo Atajo' para crear tu primer atajo.": "Fes clic al botó 'Afegir Nova Drecera' per crear la teva primera drecera."
+  "Haz click en el botón 'Añadir Nuevo Atajo' para crear tu primer atajo.": "Fes clic al botó 'Afegir Nova Drecera' per crear la teva primera drecera.",
+  "Escribe tu prompt aquí. El texto seleccionado se añadirá automáticamente.": "Escriu el teu prompt aquí. El text seleccionat s'afegirà automàticament."
 }

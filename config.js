@@ -662,6 +662,12 @@ function updateText(data) {
     elements.forEach((element) => {
         element.textContent = translation;
     });
+
+    // Actualizar placeholders que usen data-i18n-placeholder
+    const placeholderElements = document.querySelectorAll(`[data-i18n-placeholder="${key}"]`);
+    placeholderElements.forEach((element) => {
+        element.setAttribute('placeholder', translation);
+    });
 }
 
 // Listen for translation response and update the DOM
@@ -689,6 +695,13 @@ function loadAllTranslations() {
     elements.forEach((element) => {
         const key = element.getAttribute('data-i18n');
         ipcRenderer.send('get-translation', key); // Request translation from the main process
+    });
+
+    // Solicitar traducciones para placeholders
+    const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
+    placeholderElements.forEach((element) => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        ipcRenderer.send('get-translation', key);
     });
 }
 
