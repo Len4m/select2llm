@@ -11,7 +11,8 @@
   },
   "main": "main.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development electronmon --trace-warnings .",
+    "dev": "cross-env NODE_ENV=development electron .",
+    "dev:watch": "cross-env NODE_ENV=development electronmon --trace-warnings .",
     "start": "electron .",
     "build": "electron-builder",
     "rebuild": "electron-rebuild -f",
