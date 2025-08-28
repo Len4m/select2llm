@@ -90,11 +90,23 @@ function applyTheme(theme) {
 function setConfigFormData(data) {
     for (const key in data) {
         if (data.hasOwnProperty(key)) {
+            // Evitar asignar value directamente a radios (p. ej., theme)
+            if (key === 'theme') continue;
             const element = form.querySelector(`[name="${key}"]`);
             if (element) {
                 element.value = data[key];
             }
         }
+    }
+    // Seleccionar el tema correcto en radios
+    try {
+        const themeToSelect = data.theme || 'light';
+        const themeRadio = form.querySelector(`input[name="theme"][value="${themeToSelect}"]`);
+        if (themeRadio) {
+            themeRadio.checked = true;
+        }
+    } catch (e) {
+        // noop
     }
     document.getElementById('global-config-temperatura-span').innerText = data.temperature;
     
@@ -652,6 +664,12 @@ clearForm();
 // Apply initial theme (default to light)
 applyTheme(global_config.theme);
 
+// Asegurar radios alineados con el tema actual al iniciar
+try {
+    const initialThemeRadio = document.querySelector(`input[name="theme"][value="${global_config.theme || 'light'}"]`);
+    if (initialThemeRadio) initialThemeRadio.checked = true;
+} catch (e) { /* noop */ }
+
 /* i18n (internationalization) */
 // Request and load a specific translation
 const langSelect = document.getElementById('global-config-language');
@@ -710,13 +728,13 @@ loadAllTranslations();
 // Solicitar las constantes UI al cargar la página
 requestUIConstants();
 
-// Añadir event listener específico para el selector de tema después de que se haya cargado el DOM
+// Añadir listeners para los radios de tema después de que el DOM haya cargado
 document.addEventListener('DOMContentLoaded', () => {
-    const themeSelector = document.getElementById('global-config-theme');
-    if (themeSelector) {
-        themeSelector.addEventListener('change', (event) => {
-            console.log('Theme selector changed to:', event.target.value); // Debug log
+    const themeRadios = document.querySelectorAll('input[name="theme"]');
+    themeRadios.forEach((radio) => {
+        radio.addEventListener('change', (event) => {
+            console.log('Theme radio changed to:', event.target.value); // Debug log
             applyTheme(event.target.value);
         });
-    }
+    });
 });

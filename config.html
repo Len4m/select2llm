@@ -176,11 +176,17 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="global-config-theme" data-i18n="Tema de Interfaz">Tema de Interfaz</label>
-                        <select id="global-config-theme" name="theme" class="form-select">
-                            <option value="light" data-i18n="Claro">Claro</option>
-                            <option value="dark" data-i18n="Oscuro">Oscuro</option>
-                        </select>
+                        <label class="form-label" data-i18n="Tema de Interfaz">Tema de Interfaz</label>
+                        <div class="form-row" id="global-config-theme-group" role="radiogroup" aria-labelledby="theme-label">
+                            <label class="form-radio">
+                                <input type="radio" name="theme" value="light" id="theme-light">
+                                <span data-i18n="Claro">Claro</span>
+                            </label>
+                            <label class="form-radio" style="margin-left:16px;">
+                                <input type="radio" name="theme" value="dark" id="theme-dark">
+                                <span data-i18n="Oscuro">Oscuro</span>
+                            </label>
+                        </div>
                         <span class="form-help" data-i18n="Selecciona el tema visual de la aplicación">Selecciona el tema visual de la aplicación</span>
                     </div>
 
