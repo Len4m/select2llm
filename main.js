@@ -14,9 +14,16 @@ import { APP_CONFIG, TRAY_CONFIG, ANIMATION_CONFIG } from './constants/index.js'
 import { getTrayAnimationIcon, registerTrayForThemeUpdates } from './utils/iconHelper.js';
 
 
-// Enable usage of Portal's globalShortcuts. This is essential for cases when
-// the app runs in a Wayland session.
-app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal')
+// Configure platform-specific settings for Linux environments
+const platformInfo = platformService.getPlatformInfo();
+
+// Apply Wayland-specific Electron flags if needed
+if (platformInfo.isWayland) {
+    platformService.applyWaylandElectronFlags(app);
+}
+
+// Provide environment diagnosis for Linux
+platformService.logWaylandEnvironmentDiagnosis();
 
 // Only one instance
 const gotTheLock = app.requestSingleInstanceLock();
@@ -43,8 +50,10 @@ let isInferenceActive = false;
 
 logger.info('Application starting', {
     version: APP_CONFIG.VERSION,
-    platform: process.platform,
-    nodeVersion: process.version
+    platform: platformInfo.platform,
+    nodeVersion: process.version,
+    sessionType: platformInfo.sessionType || 'unknown',
+    waylandSupport: platformInfo.isWayland ? 'enabled' : 'not_needed'
 });
 
 
@@ -109,6 +118,8 @@ function updateTrayForTheme() {
         tray.setImage(currentIcon);
     }
 }
+
+
 
 // Start inference process
 async function startInference(overlay = true) {
@@ -390,11 +401,35 @@ app.whenReady().then(async () => {
         // Register shortcuts if Ollama is available
         if (ollamaIsOk) {
             try {
+                // Verificar portales de Wayland antes de registrar shortcuts
+                if (platformInfo.isWayland) {
+                    await platformService.checkWaylandPortals();
+                }
+                
                 shortcutService.setCallbacks(startInference, stopInference);
-                await shortcutService.registerShortcuts();
-                logger.info('Shortcuts registered successfully');
+                const result = await shortcutService.registerShortcuts();
+                
+                if (result.registered > 0) {
+                    logger.info('Shortcuts registered successfully', { 
+                        registered: result.registered,
+                        failed: result.failed 
+                    });
+                    
+                    // Warning específico para Wayland si algunos fallan
+                    if (platformInfo.isWayland && result.failed > 0) {
+                        logger.warn('Some shortcuts failed on Wayland - this is a known limitation. Global shortcuts may only work when the app is focused.');
+                    }
+                } else {
+                    logger.warn('No shortcuts were registered successfully');
+                    if (platformInfo.isWayland) {
+                        logger.warn('Wayland global shortcuts require specific portal configuration. Consider using X11 if global shortcuts are essential.');
+                    }
+                }
             } catch (error) {
                 logger.error('Failed to register shortcuts', { error: error.message });
+                if (platformInfo.isWayland) {
+                    logger.error('Wayland shortcut registration failed. This is often due to compositor limitations or missing portal configuration.');
+                }
             }
         } else {
             logger.warn('Ollama not available, skipping shortcut registration');

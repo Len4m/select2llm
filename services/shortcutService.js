@@ -12,6 +12,8 @@ import platformService from './platformService.js';
 import ollamaService from './ollamaService.js';
 import { SHORTCUTS_CONFIG, ERROR_CODES, CLIPBOARD_CONFIG } from '../constants/index.js';
 
+
+
 export class ShortcutService {
     constructor() {
         this.registeredShortcuts = new Map();
@@ -303,6 +305,15 @@ export class ShortcutService {
      */
     async registerShortcuts() {
         try {
+            // Información del entorno
+            const platformInfo = platformService.getPlatformInfo();
+            
+            if (platformInfo.isWayland) {
+                logger.info('Registering shortcuts on Wayland session - using GlobalShortcutsPortal');
+            } else if (platformInfo.isLinux && !platformInfo.sessionType) {
+                logger.warn('Unknown display server detected - shortcuts may not work properly');
+            }
+            
             // Desregistrar shortcuts previos
             this.unregisterAll();
             
@@ -324,14 +335,36 @@ export class ShortcutService {
                     registered++;
                 } else {
                     failed++;
+                    if (platformInfo.isWayland) {
+                        logger.warn('Shortcut registration failed on Wayland - this may be due to portal permissions or compositor limitations', {
+                            shortcut: this.buildShortcutCombination(shortcut)
+                        });
+                    }
                 }
             }
 
             logger.info('Shortcuts registration completed', { 
                 total: shortcuts.length,
                 registered,
-                failed
+                failed,
+                environment: platformInfo.isLinux ? platformInfo.sessionType || 'unknown' : platformInfo.platform
             });
+
+            if (failed > 0 && platformInfo.isWayland) {
+                logger.warn('Some shortcuts failed to register on Wayland. This is a known limitation.', {
+                    issue: 'Wayland global shortcuts are not truly global in many environments',
+                    workarounds: [
+                        'Use X11 session instead of Wayland for true global shortcuts',
+                        'Configure compositor-specific global shortcuts manually',
+                        'Use the application while focused to trigger shortcuts'
+                    ],
+                    technical_requirements: [
+                        'Compositor must support global shortcuts portal',
+                        'xdg-desktop-portal and compositor-specific portal installed',
+                        'Portal permissions properly configured'
+                    ]
+                });
+            }
 
             return { registered, failed };
 

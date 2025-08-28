@@ -6,10 +6,20 @@
 import { exec, execSync } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { screen } from 'electron';
 import logger from './logger.js';
 
 // Importar controllers específicos de plataforma
-import { sendCopyLinux, sendTextLinux, getLinuxWindowGeometry, clearStuckModifiers } from '../controllers/linuxController.js';
+import { 
+    sendCopyLinux, 
+    sendTextLinux, 
+    getLinuxWindowGeometry, 
+    clearStuckModifiers, 
+    checkWaylandPortals,
+    detectLinuxDisplayServer,
+    applyWaylandElectronFlags,
+    logWaylandEnvironmentDiagnosis
+} from '../controllers/linuxController.js';
 import { sendCopyWindows, sendTextWindows, getWindowsWindowGeometry } from '../controllers/windowsController.js';
 import { 
     sendCopyMac, 
@@ -33,7 +43,7 @@ export class PlatformService {
         };
         
         // Configuración específica de Linux
-        this.sessionType = (process.env.XDG_SESSION_TYPE || '').toLowerCase();
+        this.sessionType = detectLinuxDisplayServer();
         
         // Rutas de scripts de PowerShell para Windows
         this.powerShellScripts = {
@@ -45,6 +55,8 @@ export class PlatformService {
         logger.platformOperation('Initialized', this.platform);
     }
 
+
+
     /**
      * Obtiene información sobre la plataforma actual
      */
@@ -54,7 +66,9 @@ export class PlatformService {
             sessionType: this.sessionType,
             isWindows: this.platform === 'win32',
             isMacOS: this.platform === 'darwin',
-            isLinux: this.platform === 'linux'
+            isLinux: this.platform === 'linux',
+            isWayland: this.platform === 'linux' && this.sessionType === 'wayland',
+            isX11: this.platform === 'linux' && this.sessionType === 'x11'
         };
     }
 
@@ -91,7 +105,7 @@ export class PlatformService {
     }
 
     /**
-     * Ejecuta un comando de forma asíncrona con manejo de errores
+     * Executes a command asynchronously with error handling
      */
     executeCommand(command, description = 'Command execution') {
         return new Promise((resolve, reject) => {
@@ -115,7 +129,27 @@ export class PlatformService {
     }
 
     /**
-     * Ejecuta un comando de forma síncrona
+     * Executes a command asynchronously without error logging (for multi-distro checks)
+     */
+    executeCommandSilent(command, description = 'Silent command execution') {
+        return new Promise((resolve, reject) => {
+            logger.debug(`Executing silent command: ${command}`, { description });
+            
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    // No log errors for silent commands - they're expected to fail in multi-distro checks
+                    reject(new Error(`${description} failed: ${error.message}`));
+                    return;
+                }
+                
+                logger.debug(`Silent command completed: ${description}`, { stdout: stdout.trim() });
+                resolve(stdout.trim());
+            });
+        });
+    }
+
+    /**
+     * Executes a command synchronously
      */
     executeCommandSync(command, description = 'Sync command execution') {
         try {
@@ -133,7 +167,7 @@ export class PlatformService {
     }
 
     /**
-     * Envía comando de copia según la plataforma y devuelve el identificador de la ventana
+     * Sends copy command according to platform and returns window identifier
      */
     async sendCopyCommand() {
         logger.platformOperation('sendCopyCommand', this.platform);
@@ -151,7 +185,7 @@ export class PlatformService {
     }
 
     /**
-     * Envía texto como si fuera escrito según la plataforma
+     * Sends text as if typed according to platform
      */
     async sendText(text) {
         if (!text || text.length === 0) {
@@ -174,27 +208,72 @@ export class PlatformService {
     }
 
     /**
-     * Obtiene la geometría de la ventana según la plataforma
+     * Gets window geometry according to platform
      */
     async getWindowGeometry() {
         logger.platformOperation('getWindowGeometry', this.platform);
 
-        const defaultGeometry = { x: 0, y: 0, width: 0, height: 0 };
+        // Try to get platform-specific focused window geometry first
+        let platformGeometry = null;
+        
+        try {
+            switch (this.platform) {
+                case 'win32':
+                    platformGeometry = getWindowsWindowGeometry();
+                    break;
+                case 'darwin':
+                    platformGeometry = getMacWindowGeometry();
+                    break;
+                case 'linux':
+                    platformGeometry = getLinuxWindowGeometry();
+                    break;
+            }
+        } catch (error) {
+            logger.debug('Platform-specific geometry failed', { error: error.message });
+        }
 
-        switch (this.platform) {
-            case 'win32':
-                return getWindowsWindowGeometry();
-            case 'darwin':
-                return getMacWindowGeometry();
-            case 'linux':
-                return getLinuxWindowGeometry();
-            default:
-                return defaultGeometry;
+        // If platform-specific method worked, use it
+        if (platformGeometry && platformGeometry !== false) {
+            logger.debug('Using platform-specific window geometry', platformGeometry);
+            return platformGeometry;
+        }
+
+        // Fallback: use Electron's screen API for full-screen overlay
+        try {
+            const primaryDisplay = screen.getPrimaryDisplay();
+            const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
+            
+            const fullScreenGeometry = {
+                x: 0,
+                y: 0,
+                width: screenWidth,
+                height: screenHeight
+            };
+            
+            logger.debug('Using full-screen geometry from Electron screen API', {
+                ...fullScreenGeometry,
+                scaleFactor: primaryDisplay.scaleFactor
+            });
+            
+            return fullScreenGeometry;
+            
+        } catch (electronError) {
+            logger.warn('Failed to get screen geometry, using safe defaults', { 
+                error: electronError.message  
+            });
+            
+            // Ultimate fallback
+            return {
+                x: 0,
+                y: 0,
+                width: 500,
+                height: 500
+            };
         }
     }
 
     /**
-     * Limpia modificadores pegados (especialmente útil en Linux X11)
+     * Clears stuck modifiers (especially useful in Linux X11)
      */
     clearStuckModifiers() {
         logger.platformOperation('clearStuckModifiers', this.platform);
@@ -213,13 +292,13 @@ export class PlatformService {
         }
     }
 
-    // === MÉTODOS DE UTILIDAD HEREDADOS ===
-    // Los métodos específicos de plataforma ahora se manejan en los controllers dedicados
+    // === INHERITED UTILITY METHODS ===
+    // Platform-specific methods are now handled in dedicated controllers
 
-    // === MÉTODOS ESPECÍFICOS DE MACOS ===
+    // === MACOS-SPECIFIC METHODS ===
 
     /**
-     * Obtiene información de la aplicación actualmente enfocada (solo macOS)
+     * Gets information of currently focused application (macOS only)
      */
     async getFrontmostApplication() {
         if (this.platform !== 'darwin') {
@@ -229,7 +308,7 @@ export class PlatformService {
     }
 
     /**
-     * Obtiene información detallada de la ventana (solo macOS)
+     * Gets detailed window information (macOS only)
      */
     async getMacWindowInfo() {
         if (this.platform !== 'darwin') {
@@ -239,7 +318,7 @@ export class PlatformService {
     }
 
     /**
-     * Obtiene información del sistema (solo macOS)
+     * Gets system information (macOS only)
      */
     async getSystemInfo() {
         if (this.platform !== 'darwin') {
@@ -249,13 +328,43 @@ export class PlatformService {
     }
 
     /**
-     * Muestra una notificación del sistema (solo macOS)
+     * Shows a system notification (macOS only)
      */
     async showNotification(title, message, subtitle = '') {
         if (this.platform !== 'darwin') {
             throw new Error('showNotification is only available on macOS');
         }
         return showNotification(title, message, subtitle);
+    }
+
+    // === LINUX-SPECIFIC METHODS ===
+
+    /**
+     * Checks Wayland portals availability for global shortcuts support (Linux Wayland only)
+     */
+    async checkWaylandPortals() {
+        if (this.platform !== 'linux') {
+            throw new Error('checkWaylandPortals is only available on Linux');
+        }
+        if (this.sessionType !== 'wayland') {
+            logger.warn('checkWaylandPortals called on non-Wayland session', { sessionType: this.sessionType });
+            return null;
+        }
+        return checkWaylandPortals(this);
+    }
+
+    /**
+     * Applies Wayland-specific configurations for Electron (Linux Wayland only)
+     */
+    applyWaylandElectronFlags(app) {
+        return applyWaylandElectronFlags(app, this.sessionType);
+    }
+
+    /**
+     * Provides Wayland environment diagnosis (Linux Wayland only)
+     */
+    logWaylandEnvironmentDiagnosis() {
+        return logWaylandEnvironmentDiagnosis(this.getPlatformInfo());
     }
 }
 
