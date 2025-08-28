@@ -17,6 +17,11 @@ import { getTrayAnimationIcon, registerTrayForThemeUpdates } from './utils/iconH
 app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal')
 app.commandLine.appendSwitch('disable-gpu-sandbox');
 
+// Mitigar fallos de GPU en Windows 11: usar renderizado por software
+if (process.platform === 'win32') {
+    app.disableHardwareAcceleration();
+}
+
 const platformInfo = platformService.getPlatformInfo();
 
 // Only one instance
