@@ -79,6 +79,7 @@ export async function createOverlayWindow(obj) {
             
             win.on('closed', () => {
                 logger.debug('Overlay window closed');
+                // Note: transparentWindow reference cleanup is handled by main.js removeTransparentWindow()
             });
         });
     } catch (error) {

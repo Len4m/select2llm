@@ -81,6 +81,12 @@ function hideShowConfig() {
 // Create transparent window
 async function createTransparentWindow(obj) {
     try {
+        // Additional safety check: ensure no existing window
+        if (transparentWindow) {
+            logger.warn('Creating transparent window but one already exists, closing first');
+            removeTransparentWindow();
+        }
+        
         transparentWindow = await createOverlayWindow(obj);
         logger.debug('Transparent window created', obj);
     } catch (error) {
@@ -141,6 +147,12 @@ async function startInference(overlay = true) {
         // Create overlay window if requested
         if (overlay) {
             try {
+                // Close any existing transparent window first to prevent duplicates
+                if (transparentWindow) {
+                    logger.debug('Closing existing transparent window before creating new one');
+                    removeTransparentWindow();
+                }
+                
                 const geometry = await platformService.getWindowGeometry();
                 await createTransparentWindow(geometry);
             } catch (error) {
