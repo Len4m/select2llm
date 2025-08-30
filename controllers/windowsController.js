@@ -30,7 +30,7 @@ const HWND_VALIDATION_INTERVAL = 5000; // Validate handle every 5 seconds
  */
 async function executePowerShell(scriptPath, args = '', options = {}) {
     const timeout = options.timeout || CONFIG.TIMEOUT;
-    const command = `powershell.exe -ExecutionPolicy Bypass -NoProfile -InputFormat Text -OutputFormat Text -File "${scriptPath}" ${args}`;
+    const command = `powershell.exe -ExecutionPolicy Bypass -NoProfile -STA -InputFormat Text -OutputFormat Text -File "${scriptPath}" ${args}`;
     
     return new Promise((resolve, reject) => {
         const timer = setTimeout(() => {
@@ -147,11 +147,10 @@ export async function sendTextWindows(text) {
             hasEmojis: /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F700}-\u{1F77F}]|[\u{1F780}-\u{1F7FF}]|[\u{1F800}-\u{1F8FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u.test(text)
         });
         
-        // Pass text directly to PowerShell script - it will handle Unicode properly
+        // Enviar texto en Base64 (UTF-8) para máxima robustez
         await withRetry(async () => {
-            // Escape quotes in text for PowerShell string parameter
-            const escapedText = text.replace(/"/g, '""').replace(/`/g, '``');
-            const args = `-hWnd ${currentHWnd} -Texto "${escapedText}"`;
+            const base64 = Buffer.from(text, 'utf8').toString('base64');
+            const args = `-hWnd ${currentHWnd} -TextoBase64 "${base64}"`;
             return await executePowerShell(PS_SCRIPTS.sendText, args);
         });
         

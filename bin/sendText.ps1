@@ -9,6 +9,8 @@
     Window handle (hWnd) to send text to
 .PARAMETER Texto
     Text to send to the specified window (raw text, no escaping needed)
+.PARAMETER TextoBase64
+    Text to send encoded in Base64 (UTF-8). Takes precedence over -Texto
 .EXAMPLE
     .\sendText.ps1 -hWnd 328670 -Texto "Hello 🌍 World!"
 #>
@@ -21,14 +23,31 @@ param (
 
     [Parameter(Mandatory = $false, Position = 1)]
     [AllowEmptyString()]
-    [string]$Texto = ""
+    [string]$Texto = "",
+
+    [Parameter(Mandatory = $false)]
+    [AllowEmptyString()]
+    [string]$TextoBase64 = ""
 )
 
 # Error handling preference
 $ErrorActionPreference = 'Stop'
 
+# Determine effective text (Base64 preferred)
+$effectiveText = $null
+if (-not [string]::IsNullOrEmpty($TextoBase64)) {
+    try {
+        $bytes = [Convert]::FromBase64String($TextoBase64)
+        $effectiveText = [System.Text.Encoding]::UTF8.GetString($bytes)
+    } catch {
+        throw "Invalid Base64 text: $($_.Exception.Message)"
+    }
+} else {
+    $effectiveText = $Texto
+}
+
 # Early exit if no text to send
-if ([string]::IsNullOrEmpty($Texto)) {
+if ([string]::IsNullOrEmpty($effectiveText)) {
     Write-Verbose "No text provided, exiting"
     exit 0
 }
@@ -92,6 +111,7 @@ namespace FastTextInput {
         public const uint INPUT_KEYBOARD = 1;
         public const uint KEYEVENTF_UNICODE = 0x0004;
         public const uint KEYEVENTF_KEYUP = 0x0002;
+        public const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
         public const uint WM_SETTEXT = 0x000C;
         public const uint WM_CHAR = 0x0102;
         public const uint WM_PASTE = 0x0302;
@@ -168,6 +188,143 @@ function Send-DirectText {
     }
     catch {
         Write-Verbose "Direct text sending failed with exception: $($_.Exception.Message)"
+        return $false
+    }
+}
+
+# Establecer portapapeles en Unicode con reintentos
+function Set-ClipboardUnicode {
+    param([string]$text)
+    $maxAttempts = 6
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
+        try {
+            try {
+                Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop
+                [System.Windows.Forms.Clipboard]::SetText($text)
+                return $true
+            } catch {
+                # Intento alternativo con WPF
+                Add-Type -AssemblyName PresentationCore -ErrorAction Stop
+                [System.Windows.Clipboard]::SetDataObject($text, $true)
+                return $true
+            }
+        } catch {
+            $delay = [Math]::Min(50 * $attempt, 200)
+            Write-Verbose "Clipboard set attempt $attempt failed: $($_.Exception.Message). Retrying in ${delay}ms"
+            Start-Sleep -Milliseconds $delay
+        }
+    }
+    return $false
+}
+
+# Enviar Ctrl+V mediante SendInput (sin SendKeys)
+function Send-CtrlV {
+    try {
+        $VK_CONTROL = [uint16]0x11
+        $VK_V = [uint16]0x56
+
+        $events = @()
+
+        $kd_ctrl = New-Object FastTextInput.Win32+INPUT
+        $kd_ctrl.type = [FastTextInput.Win32]::INPUT_KEYBOARD
+        $kd_ctrl.U.ki.wVk = $VK_CONTROL
+        $kd_ctrl.U.ki.wScan = 0
+        $kd_ctrl.U.ki.dwFlags = 0
+        $kd_ctrl.U.ki.time = 0
+        $kd_ctrl.U.ki.dwExtraInfo = [IntPtr]::Zero
+        $events += $kd_ctrl
+
+        $kd_v = New-Object FastTextInput.Win32+INPUT
+        $kd_v.type = [FastTextInput.Win32]::INPUT_KEYBOARD
+        $kd_v.U.ki.wVk = $VK_V
+        $kd_v.U.ki.wScan = 0
+        $kd_v.U.ki.dwFlags = 0
+        $kd_v.U.ki.time = 0
+        $kd_v.U.ki.dwExtraInfo = [IntPtr]::Zero
+        $events += $kd_v
+
+        $ku_v = New-Object FastTextInput.Win32+INPUT
+        $ku_v.type = [FastTextInput.Win32]::INPUT_KEYBOARD
+        $ku_v.U.ki.wVk = $VK_V
+        $ku_v.U.ki.wScan = 0
+        $ku_v.U.ki.dwFlags = [FastTextInput.Win32]::KEYEVENTF_KEYUP
+        $ku_v.U.ki.time = 0
+        $ku_v.U.ki.dwExtraInfo = [IntPtr]::Zero
+        $events += $ku_v
+
+        $ku_ctrl = New-Object FastTextInput.Win32+INPUT
+        $ku_ctrl.type = [FastTextInput.Win32]::INPUT_KEYBOARD
+        $ku_ctrl.U.ki.wVk = $VK_CONTROL
+        $ku_ctrl.U.ki.wScan = 0
+        $ku_ctrl.U.ki.dwFlags = [FastTextInput.Win32]::KEYEVENTF_KEYUP
+        $ku_ctrl.U.ki.time = 0
+        $ku_ctrl.U.ki.dwExtraInfo = [IntPtr]::Zero
+        $events += $ku_ctrl
+
+        $sent = [FastTextInput.Win32]::SendInput($events.Count, $events, [FastTextInput.Win32+INPUT]::Size)
+        if ($sent -ne $events.Count) {
+            $lastError = [System.Runtime.InteropServices.Marshal]::GetLastWin32Error()
+            throw "SendInput Ctrl+V failed. Sent $sent of $($events.Count). Win32 Error: $lastError"
+        }
+        return $true
+    } catch {
+        Write-Verbose "Send-CtrlV failed: $($_.Exception.Message)"
+        return $false
+    }
+}
+
+# Enviar Shift+Insert mediante SendInput
+function Send-ShiftInsert {
+    try {
+        $VK_SHIFT = [uint16]0x10
+        $VK_INSERT = [uint16]0x2D
+
+        $events = @()
+
+        $kd_shift = New-Object FastTextInput.Win32+INPUT
+        $kd_shift.type = [FastTextInput.Win32]::INPUT_KEYBOARD
+        $kd_shift.U.ki.wVk = $VK_SHIFT
+        $kd_shift.U.ki.wScan = 0
+        $kd_shift.U.ki.dwFlags = 0
+        $kd_shift.U.ki.time = 0
+        $kd_shift.U.ki.dwExtraInfo = [IntPtr]::Zero
+        $events += $kd_shift
+
+        $kd_ins = New-Object FastTextInput.Win32+INPUT
+        $kd_ins.type = [FastTextInput.Win32]::INPUT_KEYBOARD
+        $kd_ins.U.ki.wVk = $VK_INSERT
+        $kd_ins.U.ki.wScan = 0
+        $kd_ins.U.ki.dwFlags = 0
+        $kd_ins.U.ki.time = 0
+        $kd_ins.U.ki.dwExtraInfo = [IntPtr]::Zero
+        $events += $kd_ins
+
+        $ku_ins = New-Object FastTextInput.Win32+INPUT
+        $ku_ins.type = [FastTextInput.Win32]::INPUT_KEYBOARD
+        $ku_ins.U.ki.wVk = $VK_INSERT
+        $ku_ins.U.ki.wScan = 0
+        $ku_ins.U.ki.dwFlags = [FastTextInput.Win32]::KEYEVENTF_KEYUP
+        $ku_ins.U.ki.time = 0
+        $ku_ins.U.ki.dwExtraInfo = [IntPtr]::Zero
+        $events += $ku_ins
+
+        $ku_shift = New-Object FastTextInput.Win32+INPUT
+        $ku_shift.type = [FastTextInput.Win32]::INPUT_KEYBOARD
+        $ku_shift.U.ki.wVk = $VK_SHIFT
+        $ku_shift.U.ki.wScan = 0
+        $ku_shift.U.ki.dwFlags = [FastTextInput.Win32]::KEYEVENTF_KEYUP
+        $ku_shift.U.ki.time = 0
+        $ku_shift.U.ki.dwExtraInfo = [IntPtr]::Zero
+        $events += $ku_shift
+
+        $sent = [FastTextInput.Win32]::SendInput($events.Count, $events, [FastTextInput.Win32+INPUT]::Size)
+        if ($sent -ne $events.Count) {
+            $lastError = [System.Runtime.InteropServices.Marshal]::GetLastWin32Error()
+            throw "SendInput Shift+Insert failed. Sent $sent of $($events.Count). Win32 Error: $lastError"
+        }
+        return $true
+    } catch {
+        Write-Verbose "Send-ShiftInsert failed: $($_.Exception.Message)"
         return $false
     }
 }
@@ -282,10 +439,10 @@ try {
         Write-Warning "Window with handle $hWnd is not visible"
     }
 
-    Write-Verbose "Sending text to window handle: $hWnd (length: $($Texto.Length))"
+    Write-Verbose "Sending text to window handle: $hWnd (length: $($effectiveText.Length))"
     
-    # Use SendInput with Unicode as primary method (completely safe, no escaping needed)
-    Write-Verbose "Using SendInput with Unicode for maximum safety and compatibility"
+    # Primary method: copy decoded text to clipboard and paste (Ctrl+V)
+    Write-Verbose "Using clipboard paste method for maximum compatibility"
     
     # Activate window first
     $activationResult = [FastTextInput.Win32]::SetForegroundWindow($hWndPtr)
@@ -296,43 +453,50 @@ try {
     }
     
     # Brief delay for window activation
-    Start-Sleep -Milliseconds 25
-    
-    # Send text using SendInput with Unicode (completely safe, no escaping required)
+    Start-Sleep -Milliseconds 150
+
+    # Try clipboard paste approach
     try {
-        $eventsSent = Send-UnicodeText -text $Texto
-        
-        if ($eventsSent -gt 0) {
-            Write-Verbose "Text sent successfully via SendInput Unicode: $eventsSent input events"
-        } else {
-            throw "SendInput Unicode failed - no events were sent"
+        # Establecer portapapeles robusto
+        if (-not (Set-ClipboardUnicode -text $effectiveText)) {
+            throw "Failed to set clipboard"
         }
+
+        # Pequeña espera
+        Start-Sleep -Milliseconds 25
+
+        # Intento 1: Enviar WM_PASTE directo
+        try {
+            [FastTextInput.Win32]::SendMessage($hWndPtr, [FastTextInput.Win32]::WM_PASTE, [IntPtr]::Zero, [IntPtr]::Zero) | Out-Null
+            Write-Verbose "WM_PASTE message sent"
+        } catch {
+            Write-Verbose "WM_PASTE send failed: $($_.Exception.Message)"
+        }
+
+        # Intento 2: Ctrl+V
+        Start-Sleep -Milliseconds 20
+        if (-not (Send-CtrlV)) {
+            Write-Verbose "Ctrl+V failed, trying Shift+Insert"
+            # Intento 3: Shift+Insert
+            if (-not (Send-ShiftInsert)) {
+                throw "Keyboard paste failed"
+            }
+        }
+        Write-Verbose "Text pasted successfully via clipboard"
     }
     catch {
-        Write-Verbose "SendInput Unicode failed, trying SendKeys as fallback"
-        
-        # Fallback: Try SendKeys with escaping
+        Write-Verbose "Clipboard paste failed: $($_.Exception.Message). Trying SendInput Unicode as fallback"
+
+        # Fallback a SendInput Unicode
         try {
-            Add-Type -AssemblyName System.Windows.Forms -ErrorAction Stop
-            
-            # Escape text for SendKeys as last resort
-            $escapedText = Escape-ForSendKeys -inputText $Texto
-            Write-Verbose "Fallback to SendKeys with escaped text: '$escapedText'"
-            
-            [System.Windows.Forms.SendKeys]::SendWait($escapedText)
-            Write-Verbose "Text sent successfully via SendKeys fallback"
-        }
-        catch {
-            Write-Verbose "SendKeys also failed, trying direct method as final backup"
-            
-            # Final backup: Try direct method
-            $directSuccess = Send-DirectText -windowHandle $hWndPtr -text $Texto
-            
+            $eventsSent = Send-UnicodeText -text $effectiveText
+            if ($eventsSent -le 0) { throw "No events sent" }
+        } catch {
+            Write-Verbose "Unicode SendInput fallback failed: $($_.Exception.Message). Trying direct method"
+            $directSuccess = Send-DirectText -windowHandle $hWndPtr -text $effectiveText
             if (-not $directSuccess) {
-                throw "All methods failed: SendInput Unicode, SendKeys, and direct methods: $($_.Exception.Message)"
+                throw "All methods failed: Clipboard paste, SendInput Unicode, and direct methods"
             }
-            
-            Write-Verbose "Direct method succeeded as final backup"
         }
     }
     
