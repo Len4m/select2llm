@@ -16,7 +16,55 @@ export function detectLinuxDisplayServer() {
     return null;
 }
 
+/**
+ * Detects the system language and ensures UTF-8 encoding.
+ * @returns {object} Object with LANG and LC_ALL values for UTF-8
+ */
+export function detectSystemLanguageUTF8() {
+    try {
+        // Intentar obtener el idioma del sistema de diferentes fuentes
+        let systemLang = process.env.LANG || 
+                        process.env.LC_ALL || 
+                        process.env.LC_CTYPE ||
+                        'en_US.UTF-8'; // fallback por defecto
+
+        logger.debug('Detected system language', { originalLang: systemLang });
+
+        // Si ya tiene UTF-8, usarlo tal como está
+        if (systemLang.includes('UTF-8') || systemLang.includes('utf8')) {
+            return {
+                LANG: systemLang,
+                LC_ALL: systemLang
+            };
+        }
+
+        // Si no tiene UTF-8, intentar agregarlo
+        // Extraer la parte del idioma (ej: es_ES de es_ES.ISO-8859-1)
+        const langPart = systemLang.split('.')[0];
+        const utf8Lang = `${langPart}.UTF-8`;
+
+        logger.debug('Converted to UTF-8', { 
+            original: systemLang, 
+            converted: utf8Lang 
+        });
+
+        return {
+            LANG: utf8Lang,
+            LC_ALL: utf8Lang
+        };
+
+    } catch (error) {
+        logger.warn('Failed to detect system language, using default', { error: error.message });
+        // Fallback seguro
+        return {
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US.UTF-8'
+        };
+    }
+}
+
 const sessionType = detectLinuxDisplayServer();
+const systemLanguage = detectSystemLanguageUTF8();
 let activeWid = null;
 
 /**
@@ -43,14 +91,19 @@ export function sendTextLinux(text) {
                             : 'xdotool type --clearmodifiers --delay 1 --file -';
                         
                         await new Promise((partResolve, partReject) => {
-                            const child = exec(command, (error) => {
+                            const child = exec(command, { 
+                                encoding: 'utf8',
+                                env: { ...process.env, ...systemLanguage }
+                            }, (error) => {
                                 if (error) {
                                     return partReject(error);
                                 }
                                 partResolve();
                             });
                             
-                            child.stdin.write(part);
+                            // Asegurar que el texto se envía como UTF-8
+                            child.stdin.setDefaultEncoding('utf8');
+                            child.stdin.write(part, 'utf8');
                             child.stdin.end();
                         });
                     }
@@ -82,7 +135,10 @@ export function sendTextLinux(text) {
         } else if (sessionType === 'wayland') {
             // Para Wayland usando wtype con stdin para evitar problemas de escape
             logger.debug('Sending text via Wayland');
-            const child = exec('wtype -', (error) => {
+            const child = exec('wtype -', { 
+                encoding: 'utf8',
+                env: { ...process.env, ...systemLanguage }
+            }, (error) => {
                 if (error) {
                     logger.error('Error sending text with wtype', { error });
                     return reject(error);
@@ -90,7 +146,9 @@ export function sendTextLinux(text) {
                 resolve();
             });
             
-            child.stdin.write(text);
+            // Asegurar que el texto se envía como UTF-8
+            child.stdin.setDefaultEncoding('utf8');
+            child.stdin.write(text, 'utf8');
             child.stdin.end();
             
         } else {
